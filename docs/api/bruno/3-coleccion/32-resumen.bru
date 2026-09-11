@@ -1,0 +1,21 @@
+meta {
+  name: 32 Resumen del álbum (200)
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/albumes/{{albumId}}/resumen
+  body: none
+  auth: none
+}
+
+tests {
+  test("200 con totales y porcentaje", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.catalogadas).to.equal(10);
+    expect(res.body.obtenidas).to.equal(3);
+    expect(res.body.faltantes).to.equal(17);
+    expect(res.body.porcentajeCompletado).to.equal(15);
+  });
+}

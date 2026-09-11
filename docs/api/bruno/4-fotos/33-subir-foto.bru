@@ -1,0 +1,26 @@
+meta {
+  name: 33 Subir foto (200)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/laminas/{{lamina2Id}}/foto
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  X-Usuario: equipo
+}
+
+body:multipart-form {
+  archivo: @file(archivos/lamina.png)
+}
+
+tests {
+  test("200 con fotoUrl", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.fotoUrl).to.equal("/api/laminas/" + bru.getVar("lamina2Id") + "/foto");
+  });
+}

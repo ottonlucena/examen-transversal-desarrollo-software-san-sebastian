@@ -1,0 +1,31 @@
+meta {
+  name: 21 Actualizar lámina (200)
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/laminas/{{laminaPruebaId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-Usuario: bruno
+}
+
+body:json {
+  {
+    "numero": 20,
+    "nombre": "Lámina de prueba editada",
+    "tipo": "ESPECIAL"
+  }
+}
+
+tests {
+  test("200 con los datos nuevos", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.tipo).to.equal("ESPECIAL");
+    expect(res.body.auditoria.modificadoPor).to.equal("bruno");
+  });
+}

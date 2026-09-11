@@ -1,0 +1,41 @@
+meta {
+  name: 12 Crear álbum (201)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/albumes
+  body: json
+  auth: none
+}
+
+headers {
+  X-Usuario: equipo
+}
+
+body:json {
+  {
+    "nombre": "Qatar 2022",
+    "imagen": "https://ejemplo.cl/qatar-2022.png",
+    "fechaLanzamiento": "2022-08-24",
+    "tipoLaminas": "ADHESIVA",
+    "totalLaminas": 20,
+    "editorial": "Panini",
+    "descripcion": "Álbum creado desde Bruno"
+  }
+}
+
+script:post-response {
+  bru.setVar("albumId", res.body.id);
+}
+
+tests {
+  test("201 Created con header Location", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getHeader("location")).to.contain("/api/albumes/" + res.body.id);
+  });
+  test("auditoría registra al usuario del header", function() {
+    expect(res.body.auditoria.creadoPor).to.equal("equipo");
+  });
+}

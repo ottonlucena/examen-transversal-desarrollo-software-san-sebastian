@@ -1,0 +1,26 @@
+meta {
+  name: 36 Archivo mayor a 5 MB (413)
+  type: http
+  seq: 4
+}
+
+docs {
+  El archivo grande no se versiona. Generarlo antes de ejecutar esta request (desde docs/api/bruno):
+  python3 -c "import os; open('archivos/grande.png','wb').write(b'\x89PNG\r\n\x1a\n' + os.urandom(6*1024*1024))"
+}
+
+post {
+  url: {{baseUrl}}/api/laminas/{{lamina3Id}}/foto
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  archivo: @file(archivos/grande.png)
+}
+
+tests {
+  test("413 supera el máximo de 5 MB", function() {
+    expect(res.getStatus()).to.equal(413);
+  });
+}

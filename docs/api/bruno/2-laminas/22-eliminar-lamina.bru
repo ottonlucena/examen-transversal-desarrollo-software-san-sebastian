@@ -1,0 +1,21 @@
+meta {
+  name: 22 Eliminar lámina (204)
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/laminas/{{laminaPruebaId}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-Usuario: carla
+}
+
+tests {
+  test("204 sin contenido", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

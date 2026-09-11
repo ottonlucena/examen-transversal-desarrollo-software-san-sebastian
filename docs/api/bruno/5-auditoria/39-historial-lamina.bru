@@ -1,0 +1,19 @@
+meta {
+  name: 39 Historial de lámina eliminada (200)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/laminas/{{laminaPruebaId}}/historial
+  body: none
+  auth: none
+}
+
+tests {
+  test("200 con creación, modificación y eliminación", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.map((r) => r.operacion)).to.eql(["CREACION", "MODIFICACION", "ELIMINACION"]);
+    expect(res.body.map((r) => r.usuario)).to.eql(["equipo", "bruno", "carla"]);
+  });
+}

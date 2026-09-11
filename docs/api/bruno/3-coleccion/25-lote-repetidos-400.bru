@@ -1,0 +1,27 @@
+meta {
+  name: 25 Lote con números repetidos (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/albumes/{{albumId}}/laminas/lote
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "laminas": [
+      { "numero": 11, "nombre": "Primera", "tipo": "NORMAL" },
+      { "numero": 11, "nombre": "Segunda", "tipo": "NORMAL" }
+    ]
+  }
+}
+
+tests {
+  test("400 del validador @NumerosUnicos", function() {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.body.errores.laminas).to.contain("repetidos: 11");
+  });
+}
