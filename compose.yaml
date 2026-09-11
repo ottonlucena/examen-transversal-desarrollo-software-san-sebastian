@@ -1,0 +1,47 @@
+# Sistema completo:        docker compose up --build
+# Solo base de datos (dev): docker compose up -d mysql
+name: coleccion-laminas
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: coleccion-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-coleccion_laminas}
+      MYSQL_USER: ${DB_USER:-coleccion}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-coleccion}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      TZ: America/Santiago
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  api:
+    build: ./backend
+    container_name: coleccion-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/${DB_NAME:-coleccion_laminas}?serverTimezone=America/Santiago
+      DB_USER: ${DB_USER:-coleccion}
+      DB_PASSWORD: ${DB_PASSWORD:-coleccion}
+      UPLOAD_DIR: /app/uploads
+      TZ: America/Santiago
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  mysql-data:
+  uploads:
