@@ -1,0 +1,366 @@
+# BRIEF — Examen Transversal · Desarrollo de Software Web II (IPSS)
+
+**Proyecto:** API REST para gestionar colecciones de láminas de álbumes
+**Stack:** Java 21 · Spring Boot 4.1.x · Maven (Spring Initializr) · Spring Data JPA · **MySQL 8.4 (obligatorio)** · **Flyway** · Docker Compose
+**Modalidad:** grupal (máx. 3) · **Peso:** 40 % de la nota final · **Exigencia:** 60 % (60 pts = 4,0)
+**Plazo:** **jueves 17-09-2026** (el 18 es feriado; el profesor debe tener las notas antes del viernes)
+**Entregables:** informe en **PDF** + repositorio **GitHub** (link en un `.txt`) + **ZIP** con proyecto e informe → `EXT_GRUPO_APELLIDO_NOMBRE`
+
+> Fuentes: enunciado (PDF), rúbrica (PDF) y transcripción de la última clase (`text-clase`). Cuando el profesor aclaró o cambió algo en clase, esta versión del brief ya lo incorpora (ver §2.2).
+
+---
+
+## 1. Qué hay que construir
+
+Un backend REST (el frontend **no** es obligatorio) que permita:
+
+1. CRUD de **álbumes**.
+2. CRUD de **láminas** de cada álbum, con **foto opcional** (subida por `multipart`).
+3. **Carga de láminas en lote** (enviar un listado en una sola petición).
+4. Listar las **láminas faltantes** y las **repetidas**, con la **cantidad de repetidas de cada una**.
+5. Documentar la API (request/response) y **probar cada endpoint, con un screenshot por prueba en el informe**.
+
+El profesor pidió seguir estas funcionalidades **al pie de la letra**.
+
+---
+
+## 2. Análisis de la rúbrica (100 pts)
+
+### 2.1 Indicadores
+
+| # | Indicador | Pts | Nivel Sobresaliente (90–100 %) | Cómo lo aseguramos |
+|---|-----------|:---:|--------------------------------|--------------------|
+| 1 | Configuración del proyecto y conexión a BD (IL1) | **20** | Proyecto y conexión MySQL "perfectamente configurados sin errores"; dependencias correctas | Initializr limpio, `pom.xml` sin dependencias sobrantes, MySQL en Docker Compose, configuración externalizada en properties y variables de entorno, arranque sin errores |
+| 2 | Modelo de datos y API REST (IL3) | **25** | Entidades y API "perfectamente diseñadas"; CRUD "completo y eficiente" | `Album` 1:N `Lamina`, DTOs, códigos HTTP correctos, rutas REST coherentes, paginación |
+| 3 | Funcionalidades especiales de láminas (IL4) | **25** | "Operaciones eficientes y precisas"; separación entre lógica de negocio y acceso a datos | Carga en lote transaccional, faltantes y repetidas resueltas con consultas en el repositorio, lógica en los Services, controllers delgados |
+| 4 | **Validaciones y auditoría** (IL2) | **20** | "Validaciones avanzadas y auditorías detalladas para rastrear cambios" | Bean Validation, validaciones de negocio, errores uniformes, **migraciones Flyway** (lo que pidió el profesor), JPA Auditing y Hibernate Envers |
+| 5 | Calidad del informe y documentación del código | **10** | Informe bien estructurado; explicación clara de todo el código | Informe PDF con formato exacto, justificación de la tecnología, Javadoc, Swagger y colección Bruno |
+
+### 2.2 Aclaraciones del profesor en la última clase
+
+| Tema | PDFs | Lo que dijo el profesor | Decisión |
+|------|------|-------------------------|----------|
+| **Auditoría** | "Herramientas de auditoría para rastrear cambios en la BD" | **"La herramienta de auditoría son migrations… utilizar migraciones, importante"** | **Flyway es obligatorio.** `ddl-auto=validate`: el esquema lo crean solo las migraciones. JPA Auditing y Envers quedan como capa extra para Sobresaliente. |
+| **Docker** | No se menciona | "Van a tener que usar Docker… está pidiendo MySQL, por lo tanto Docker" | `compose.yaml` con MySQL y la API. |
+| **Framework** | Spring Boot + Maven | Puede ser cualquiera, **justificándolo en el informe**; "porque lo pedía el trabajo" también es válido | Seguimos con Spring Boot (cumple enunciado y rúbrica) + sección de justificación en el informe. |
+| **BD no relacional** | La rúbrica la menciona | "Olvídense de lo no relacional… es relacional sí o sí" | **Sin NoSQL.** Solo MySQL. |
+| **Formato del informe** | Word o PDF | Acepta PDF, Markdown o video; **pidió no mandar Word** | **PDF.** |
+| **Entrega del código** | ZIP | "Mándenlo en un GitHub y el link en un documento de texto" | GitHub + `.txt` con el link, **dentro del ZIP**, para cumplir ambas instrucciones. |
+| **Documentación de la API** | "Documentación simple" | Vale colección de Bruno, PDF, Markdown u OpenAPI | **Swagger/OpenAPI + colección Bruno**. |
+| **Fotos** | "Carga opcional de una foto" | `multipart`; guardar imágenes en Base64 en la BD es mala práctica | Archivo en disco (volumen Docker) y solo la ruta en la BD. |
+| **Rúbrica** | — | "Siempre la rúbrica al pie de la letra" | La rúbrica manda. Lo único flexible es la tecnología; MySQL es fijo. |
+
+### 2.3 Riesgos
+
+- **Sin validaciones ni auditoría se pierden 20 pts** (nota máxima ≈ 5,5), y **sin migraciones el indicador 4 queda cojo** aunque haya Envers.
+- **Informe con tope de 10 páginas** y un screenshot por prueba: hay que agrupar capturas y usar tablas.
+- **"Eficiente"** aparece en los indicadores 2 y 3: faltantes y repetidas se resuelven con consultas a la BD, nunca filtrando listas en memoria; la carga en lote va con `@Transactional`.
+- **Plazo corto (~1 semana):** el alcance mínimo va primero y los extras (Envers, tests) después.
+
+| Escenario | Puntaje | Nota |
+|-----------|:------:|:----:|
+| Todo "Alto" | 80 | 5,5 |
+| Todo "Alto" sin validaciones ni auditoría | 64 | 4,3 |
+| Todo "Sobresaliente" | 100 | 7,0 |
+
+---
+
+## 3. Diseño
+
+### 3.1 Arquitectura en capas
+
+```
+Cliente (Bruno / Swagger UI)
+      │ JSON · multipart
+      ▼
+controller ──► service (interfaz + impl) ──► repository (JpaRepository) ──► MySQL 8.4
+   │  DTOs         │ reglas de negocio,              ▲
+   │  @Valid       │ @Transactional                  │ esquema versionado
+   ▼               ▼                                  │
+exception      FileStorageService ──► volumen uploads/  Flyway (db/migration)
+(ProblemDetail)
+```
+
+### 3.2 Estructura del repositorio
+
+```
+EXAMEN-TRANSVERSAL/                  ← repo GitHub
+├── AGENTS.md · CLAUDE.md · BRIEF.md · README.md
+├── compose.yaml                     ← mysql + api + volúmenes
+├── .env.example                     ← variables (sin secretos reales)
+├── backend/                         ← proyecto generado con Spring Initializr
+│   ├── Dockerfile                   ← multi-stage (Maven → JRE 21)
+│   ├── mvnw · pom.xml
+│   └── src/main/
+│       ├── java/cl/ipss/coleccion/
+│       │   ├── config/        (JpaAuditingConfig, OpenApiConfig)
+│       │   ├── controller/    (AlbumController, LaminaController)
+│       │   ├── dto/           (records request/response)
+│       │   ├── entity/        (Album, Lamina, TipoLamina, EntidadAuditable, Revision)
+│       │   ├── exception/     (RecursoNoEncontradoException, ReglaNegocioException, GlobalExceptionHandler)
+│       │   ├── mapper/        (AlbumMapper, LaminaMapper)
+│       │   ├── repository/    (AlbumRepository, LaminaRepository)
+│       │   ├── service/       (AlbumService, LaminaService, FileStorageService + impl/)
+│       │   └── validation/    (validadores personalizados)
+│       └── resources/
+│           ├── application.properties
+│           └── db/migration/  (V1__..., V2__..., ...)
+└── docs/
+    ├── api/bruno/                   ← colección Bruno
+    ├── evidencias/                  ← screenshots numerados
+    └── informe/                     ← fuente y PDF del informe
+```
+
+### 3.3 Modelo de datos
+
+**Album** (tabla `album`)
+| Campo | Columna | Tipo | Validación |
+|-------|---------|------|------------|
+| id | `id` | BIGINT PK autoincremental | — |
+| nombre | `nombre` | VARCHAR(100) | `@NotBlank`, `@Size(max=100)`, **único** |
+| imagen | `imagen` | VARCHAR(500) | opcional, URL válida |
+| fechaLanzamiento | `fecha_lanzamiento` | DATE | `@NotNull`, `@PastOrPresent` |
+| tipoLaminas | `tipo_laminas` | VARCHAR(30) (enum) | `@NotNull` (ADHESIVA, TROQUELADA, TARJETA…) |
+| totalLaminas | `total_laminas` | INT | `@NotNull`, `@Min(1)` |
+| editorial, descripcion | … | VARCHAR | opcionales |
+| auditoría | `creado_en`, `modificado_en`, `creado_por`, `modificado_por` | | automático |
+
+**Lamina** (tabla `lamina`)
+| Campo | Columna | Tipo | Validación |
+|-------|---------|------|------------|
+| id | `id` | BIGINT PK | — |
+| numero | `numero` | INT | `@NotNull`, `@Min(1)`, **≤ totalLaminas del álbum**, **único por álbum** (`UNIQUE(album_id, numero)`) |
+| nombre | `nombre` | VARCHAR(100) | `@NotBlank` |
+| tipo | `tipo` | VARCHAR(30) (enum `TipoLamina`) | `@NotNull` (NORMAL, BRILLANTE, ESPECIAL, ESCUDO…) |
+| cantidad | `cantidad` | INT DEFAULT 0 | `@Min(0)`: copias que tiene el coleccionista |
+| foto | `foto` | VARCHAR(255) | **opcional**; guarda solo el nombre/ruta del archivo |
+| album | `album_id` | FK → album.id, NOT NULL, ON DELETE CASCADE | — |
+| auditoría | ídem | | automático |
+
+**Regla de negocio central:**
+- **Faltante** → `cantidad = 0`
+- **Obtenida** → `cantidad ≥ 1`
+- **Repetida** → `cantidad > 1`; **repetidas = cantidad − 1**
+
+### 3.4 Endpoints
+
+**Álbumes** — `/api/albumes`
+| Método | Ruta | Descripción | Respuestas |
+|--------|------|-------------|------------|
+| POST | `/api/albumes` | Crear álbum | 201 + `Location` · 400 · 409 |
+| GET | `/api/albumes` | Listar (paginado `?page&size&sort`) | 200 |
+| GET | `/api/albumes/{id}` | Obtener | 200 · 404 |
+| PUT | `/api/albumes/{id}` | Actualizar | 200 · 400 · 404 · 409 |
+| DELETE | `/api/albumes/{id}` | Eliminar (cascada a láminas y fotos) | 204 · 404 |
+| GET | `/api/albumes/{id}/resumen` | Totales: obtenidas, faltantes, repetidas, % completado | 200 · 404 |
+| GET | `/api/albumes/{id}/historial` | Revisiones de auditoría (Envers) | 200 · 404 |
+
+**Láminas**
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/albumes/{albumId}/laminas` | Crear una lámina |
+| POST | `/api/albumes/{albumId}/laminas/lote` | **Carga masiva**: lista de láminas; todo o nada |
+| POST | `/api/albumes/{albumId}/laminas/registrar` | **Registrar obtenidas por número**: `{"numeros":[1,5,5,12]}` suma cantidades |
+| GET | `/api/albumes/{albumId}/laminas` | Listar (filtro opcional `?tipo=`) |
+| GET | `/api/albumes/{albumId}/laminas/faltantes` | **Faltantes** |
+| GET | `/api/albumes/{albumId}/laminas/repetidas` | **Repetidas con cantidad de repetidas c/u** |
+| GET | `/api/laminas/{id}` | Obtener |
+| PUT | `/api/laminas/{id}` | Actualizar |
+| PATCH | `/api/laminas/{id}/cantidad` | Sumar o restar copias (`{"delta": -1}`) |
+| DELETE | `/api/laminas/{id}` | Eliminar |
+| POST | `/api/laminas/{id}/foto` | **Subir foto opcional** (`multipart/form-data`, campo `archivo`) |
+| GET | `/api/laminas/{id}/foto` | Ver la foto (bytes + `Content-Type`) |
+| DELETE | `/api/laminas/{id}/foto` | Quitar la foto |
+| GET | `/api/laminas/{id}/historial` | Revisiones de auditoría (Envers) |
+
+Respuesta de repetidas (implementada así en la Fase 3):
+```json
+{
+  "albumId": 1, "laminasRepetidas": 2, "totalCopiasRepetidas": 3,
+  "laminas": [
+    { "id": 5, "numero": 5, "nombre": "Messi", "tipo": "BRILLANTE", "cantidad": 3, "repetidas": 2, "estado": "REPETIDA" },
+    { "id": 9, "numero": 9, "nombre": "Escudo Chile", "tipo": "ESCUDO", "cantidad": 2, "repetidas": 1, "estado": "REPETIDA" }
+  ]
+}
+```
+Faltantes devuelve `laminas` (catalogadas con cantidad 0) **y** `numerosNoCatalogados` (números de 1..total que aún no se cargan), además de `totalFaltantes`. Así el listado es preciso aunque el catálogo esté incompleto.
+
+Error uniforme (RFC 9457 `ProblemDetail`):
+```json
+{
+  "type": "about:blank", "title": "Datos inválidos", "status": 400,
+  "detail": "La solicitud contiene errores de validación",
+  "instance": "/api/albumes",
+  "errores": { "nombre": "no debe estar vacío", "totalLaminas": "debe ser mayor o igual a 1" }
+}
+```
+
+### 3.5 Validaciones (indicador 4)
+
+- **Básicas:** `@Valid` en los controllers y Bean Validation en los DTOs.
+- **Avanzadas:**
+  - `GlobalExceptionHandler` (`@RestControllerAdvice`) con respuestas `ProblemDetail` para 400, 404, 409, 413, 415 y 500.
+  - Reglas de negocio en el Service:
+    - número de lámina dentro de `1..totalLaminas`;
+    - número duplicado en el álbum → 409;
+    - nombre de álbum duplicado → 409;
+    - bajar `totalLaminas` por debajo del número de lámina más alto → 409;
+    - la cantidad nunca queda negativa;
+    - lote con números repetidos dentro de la lista → 400 indicando qué posiciones fallan, con rollback completo.
+  - Validador personalizado (`@Constraint`), p. ej. `@NumerosUnicos` para el lote.
+  - Foto: solo `image/jpeg`, `image/png` o `image/webp`, máximo 5 MB, con verificación del contenido (no solo de la extensión).
+  - Integridad también en la BD: `NOT NULL`, `UNIQUE`, `FOREIGN KEY` y `CHECK (cantidad >= 0)` en las migraciones.
+
+### 3.6 Auditoría (indicador 4). Prioridad según el profesor
+
+1. **Migraciones Flyway (OBLIGATORIO):** el esquema se versiona en `db/migration` (`V1__crear_tabla_album.sql`, `V2__crear_tabla_lamina.sql`, `V3__agregar_columnas_auditoria.sql`, `V4__crear_tablas_envers.sql`, `V5__datos_semilla.sql`…). Las columnas de auditoría van en una migración aparte (V3) para que el historial muestre la evolución del esquema. Hibernate solo **valida** (`ddl-auto=validate`). La tabla `flyway_schema_history` registra qué cambio se aplicó, cuándo, con qué checksum y si tuvo éxito. **Esa es la evidencia principal para el informe.**
+2. **JPA Auditing:** `@EnableJpaAuditing` + clase base `EntidadAuditable` con `@CreatedDate`, `@LastModifiedDate`, `@CreatedBy` y `@LastModifiedBy`. Un `AuditorAware` lee el header `X-Usuario` o usa "sistema".
+3. **Hibernate Envers (Sobresaliente, "rastrear cambios"):** `@Audited` en `Album` y `Lamina`, con tablas `album_aud`, `lamina_aud` y `revinfo`, **también creadas por migración**. Endpoints `/historial`.
+4. **Logging SLF4J** en los Services: una línea INFO por cada operación de escritura.
+
+### 3.7 Configuración (indicador 1)
+
+**Spring Initializr** (start.spring.io): Maven · Java 21 · Spring Boot **4.1.x** (última estable) · Group `cl.ipss` · Artifact `coleccion-laminas` · Package `cl.ipss.coleccion` · Packaging Jar · Properties.
+
+**Dependencias desde Initializr:** Spring Web · Spring Data JPA · MySQL Driver · Validation · Flyway Migration · Lombok (opcional).
+**Agregar a mano:**
+- `org.hibernate.orm:hibernate-envers`, versión gestionada por Boot.
+- `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0`. Springdoc **3.x** es la línea compatible con Boot 4; la 2.x no sirve.
+
+Hay que confirmar que el `pom.xml` generado incluya `flyway-mysql`, que desde Flyway 10 es necesario para MySQL.
+
+`application.properties` (esqueleto):
+```properties
+spring.application.name=coleccion-laminas
+server.port=8080
+
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/coleccion_laminas?serverTimezone=America/Santiago}
+spring.datasource.username=${DB_USER:coleccion}
+spring.datasource.password=${DB_PASSWORD:coleccion}
+
+# El esquema lo gestiona Flyway; Hibernate solo valida
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.open-in-view=false
+spring.jpa.show-sql=false
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+# Envers: sufijo en minúsculas (MySQL en Linux distingue mayúsculas en nombres de tabla)
+spring.jpa.properties.org.hibernate.envers.audit_table_suffix=_aud
+
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=6MB
+app.upload.dir=${UPLOAD_DIR:uploads}
+
+spring.mvc.problemdetails.enabled=true
+springdoc.swagger-ui.path=/swagger-ui.html
+```
+
+### 3.8 Docker
+
+`compose.yaml` en la raíz:
+- **mysql:** imagen `mysql:8.4` (LTS), base `coleccion_laminas`, usuario y clave desde `.env`, volumen `mysql-data`, `healthcheck` con `mysqladmin ping`, puerto `3306`.
+- **api:** build desde `backend/Dockerfile` (multi-stage: `maven:3.9-eclipse-temurin-21` para compilar y `eclipse-temurin:21-jre` para ejecutar), `depends_on: mysql (service_healthy)`, `DB_URL=jdbc:mysql://mysql:3306/...`, volumen `uploads` montado en `/app/uploads`, puerto `8080`.
+
+Comandos:
+- Todo el sistema: `docker compose up --build`
+- Desarrollo local: `docker compose up -d mysql` + `./mvnw spring-boot:run`
+
+### 3.9 Documentación y pruebas
+
+- **Swagger UI** en `/swagger-ui.html`, con `@Tag`, `@Operation`, `@ApiResponse` y `@Schema` en endpoints y DTOs.
+- **Colección Bruno** en `docs/api/bruno/`, con un request por endpoint y casos de error. El profesor la sugirió.
+- **README.md:** requisitos, cómo levantar el proyecto, variables, tabla de endpoints y ejemplos.
+- **Pruebas manuales:** caso feliz + al menos un caso de error por endpoint (400, 404, 409, 413/415 en fotos) → screenshots en `docs/evidencias/NN-endpoint-caso.png`.
+- **Tests automáticos (extra):** JUnit 5 + Mockito sobre `LaminaService` (faltantes, repetidas, lote, registrar) y un `@WebMvcTest` del controller.
+
+---
+
+## 4. Informe (PDF)
+
+| Requisito | Valor |
+|-----------|-------|
+| Formato | **PDF** (el profesor pidió evitar Word) |
+| Extensión | **5 a 10 páginas** |
+| Letra | Arial 12 · interlineado 1,15 · justificado · páginas numeradas |
+| Portada | Título, asignatura, **logo IPSS**, profesor (Boris Belmar Muñoz) y alumnos |
+| Estructura | Portada · Índice · Introducción · Desarrollo · Conclusión · Bibliografía |
+| Nombre | `EXT_GRUPO_APELLIDO_NOMBRE.pdf` |
+
+**Distribución sugerida:**
+1. Portada
+2. Índice
+3. Introducción: problema, objetivo, alcance y **justificación de la tecnología** (Spring Boot, MySQL, Flyway, Docker: por qué cada uno)
+4. Desarrollo: configuración (Initializr, `pom.xml`, properties, Docker Compose) + arquitectura en capas
+5. Desarrollo: modelo de datos (diagrama ER) + entidades, repositorios y services
+6. Desarrollo: validaciones, manejo de errores y **auditoría** (migraciones Flyway + `flyway_schema_history`, JPA Auditing, Envers)
+7. Desarrollo: tabla de endpoints
+8–9. Pruebas: tabla resumen + screenshots agrupados
+10. Conclusión + bibliografía APA (docs de Spring Boot, Spring Data JPA, Flyway, Hibernate Envers, springdoc, MySQL, Docker)
+
+---
+
+## 5. Checklist de entrega
+
+**Código**
+- [x] Proyecto Maven generado con Initializr; `./mvnw verify` pasa (Testcontainers + MySQL 8.4)
+- [x] `compose.yaml` levanta MySQL 8.4 y la API sin errores
+- [x] Flyway crea todo el esquema (V1–V4); `ddl-auto=validate` no reporta diferencias
+- [ ] Entidades `Album` y `Lamina` con los campos pedidos (nombre, imagen, fecha de lanzamiento, tipo de láminas…)
+- [x] CRUD completo de álbumes
+- [x] CRUD completo de láminas
+- [x] Foto opcional (subir, ver, quitar) por `multipart`, guardada en disco
+- [x] Carga de láminas en lote (transaccional)
+- [x] Endpoint de faltantes
+- [x] Endpoint de repetidas con la cantidad de repetidas por lámina
+- [x] Resumen del álbum
+- [x] Registrar obtenidas por número y ajustar cantidad (PATCH)
+- [x] Capas controller / service / repository + DTOs (nunca se exponen entidades)
+- [x] Bean Validation + reglas de negocio + validador personalizado (`@NumerosUnicos`)
+- [x] `GlobalExceptionHandler` con `ProblemDetail` (400, 404, 409, 413, 415, 500)
+- [x] JPA Auditing (fechas y usuario vía header `X-Usuario`, bloque `auditoria` en las respuestas)
+- [x] Envers + endpoints `/historial` (incluye registros eliminados)
+- [x] Logging en los Services
+- [x] Swagger funcionando (21 operaciones documentadas, header `X-Usuario` en escrituras)
+- [x] Javadoc en las clases públicas
+- [x] README + colección Bruno (30 requests numeradas como las capturas) + datos semilla (V5)
+- [x] Tests automáticos: 11 (unitarios, MockMvc, integración) + e2e (108) + Bruno CLI (31)
+
+**Informe**
+- [ ] Formato exacto (Arial 12, 1,15, justificado, numerado, 5–10 págs.)
+- [ ] Portada completa con logo IPSS
+- [ ] Justificación de la tecnología
+- [ ] Todas las secciones
+- [ ] Screenshot de cada prueba
+- [ ] Evidencia de migraciones (`flyway_schema_history`) y de auditoría
+
+**Entrega**
+- [ ] Repositorio en GitHub (público o con acceso para el profesor)
+- [ ] `ENLACE_GITHUB.txt` con el link
+- [ ] ZIP = proyecto (sin `target/`, `uploads/` ni `.env`) + informe PDF + `.txt` con el link
+- [ ] Nombre: `EXT_GRUPO_APELLIDO_NOMBRE`
+- [ ] Subido antes del **17-09-2026**
+
+---
+
+## 6. Plan de trabajo
+
+| Fase | Tareas | Indicador | Fecha objetivo |
+|------|--------|-----------|----------------|
+| 1 | Initializr, `pom.xml`, `compose.yaml`, properties, `V1`/`V2` con Flyway, arranque limpio | 1 (20) | 11-09 |
+| 2 | Entidades, repositorios, DTOs, mappers, CRUD de álbum y lámina | 2 (25) | 12-09 |
+| 3 | Lote, registrar, faltantes, repetidas, resumen, fotos | 3 (25) | 13-09 |
+| 4 | Validaciones, `ProblemDetail`, JPA Auditing, Envers (`V3`), logging | 4 (20) | 14-09 |
+| 5 | Swagger, Bruno, README, tests, screenshots | 5 (10) | 15-09 |
+|   | *Fase 1 completada el 10-09: Boot 4.1.1, compose (MySQL 8.4 + API), Flyway V1–V2, Testcontainers* | | ✅ |
+|   | *Fase 2 completada el 10-09: entidades, repositorios, DTOs, mappers, CRUD de álbum y lámina, errores ProblemDetail; 29/29 pruebas e2e OK* | | ✅ |
+|   | *Fase 3 completada el 10-09: lote, registrar, PATCH cantidad, faltantes, repetidas, resumen (1 consulta agregada), fotos multipart; 55/55 pruebas e2e OK* | | ✅ |
+|   | *Fase 4 completada el 10-09: migraciones V3 (columnas auditoría) y V4 (Envers), JPA Auditing con `X-Usuario`, historial con Envers* | | ✅ |
+|   | *Fase 5 completada el 10-09: Swagger/OpenAPI, colección Bruno, README, V5 datos semilla, tests JUnit/MockMvc, `pruebas/e2e.sh`* | | ✅ |
+| 6 | Informe PDF, revisión de formato, GitHub y ZIP | 5 (10) | 16-09 |
+| — | Colchón | — | 17-09 |
+
+## 7. Pendientes para confirmar con el profesor
+1. ¿Los anexos con screenshots cuentan dentro del máximo de 10 páginas?
+2. ¿Qué apellido/nombre va en `EXT_GRUPO_APELLIDO_NOMBRE` si el trabajo es grupal?
+3. ¿El repositorio de GitHub puede ser privado, invitándolo como colaborador?

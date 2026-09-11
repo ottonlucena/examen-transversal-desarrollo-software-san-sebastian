@@ -1,0 +1,19 @@
+# Variables locales (se versiona .env.example)
+.env
+
+# Material del curso: solo referencia local, no se publica
+# (enunciado y rubrica de la institucion; la transcripcion contiene nombres de companeros)
+/*.pdf
+/text-clase
+
+# Fotos subidas en desarrollo
+uploads/
+
+# Archivo de 6 MB para la prueba 413 de Bruno (se genera localmente, ver 36-foto-grande-413.bru)
+docs/api/bruno/archivos/grande.png
+
+# IDE / SO
+.idea/
+*.iml
+.vscode/
+.DS_Store
