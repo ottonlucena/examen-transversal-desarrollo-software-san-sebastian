@@ -22,7 +22,7 @@ Las reglas del proyecto viven en `AGENTS.md` (fuente única, compartida con otro
 5. Si falla un test o el arranque, reportarlo con la salida real; no marcar la tarea como terminada.
 
 ### Límites
-- **No hacer commit, push ni crear el repositorio remoto** sin pedido explícito. El proyecto aún no está inicializado con git.
+- **No hacer commit, push ni crear el repositorio remoto** sin pedido explícito. Repositorio git local en `main`, con remoto `origin` → https://github.com/ottonlucena/examen-transversal-desarrollo-software-san-sebastian.git
 - **No ejecutar `docker compose down -v`** ni borrar `uploads/` sin confirmación: elimina datos y evidencias.
 - No modificar los PDFs del curso ni `text-clase`.
 - No agregar dependencias, endpoints o entidades que no estén en `BRIEF.md` sin proponerlo primero.

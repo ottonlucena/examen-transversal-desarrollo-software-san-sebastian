@@ -252,7 +252,7 @@ spring.servlet.multipart.max-file-size=5MB
 spring.servlet.multipart.max-request-size=6MB
 app.upload.dir=${UPLOAD_DIR:uploads}
 
-spring.mvc.problemdetails.enabled=true
+# ProblemDetail lo genera GlobalExceptionHandler (no activar spring.mvc.problemdetails.enabled, ver AGENTS §11)
 springdoc.swagger-ui.path=/swagger-ui.html
 ```
 
@@ -306,7 +306,7 @@ Comandos:
 - [x] Proyecto Maven generado con Initializr; `./mvnw verify` pasa (Testcontainers + MySQL 8.4)
 - [x] `compose.yaml` levanta MySQL 8.4 y la API sin errores
 - [x] Flyway crea todo el esquema (V1–V4); `ddl-auto=validate` no reporta diferencias
-- [ ] Entidades `Album` y `Lamina` con los campos pedidos (nombre, imagen, fecha de lanzamiento, tipo de láminas…)
+- [x] Entidades `Album` y `Lamina` con los campos pedidos (nombre, imagen, fecha de lanzamiento, tipo de láminas…)
 - [x] CRUD completo de álbumes
 - [x] CRUD completo de láminas
 - [x] Foto opcional (subir, ver, quitar) por `multipart`, guardada en disco
