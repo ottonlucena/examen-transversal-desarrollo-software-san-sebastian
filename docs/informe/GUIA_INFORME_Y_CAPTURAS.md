@@ -1,36 +1,32 @@
-# Guía paso a paso: capturas pendientes, informe y entrega
+# Guía de capturas, informe y entrega
 
 Examen Transversal · Desarrollo de Software Web II · Prof. Boris Marcelo Belmar Muñoz
 Grupo 2: Valeria Gómez y Otton Lucena · Archivo: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON` · Entrega: **17-09-2026**
 
 > Las pruebas de la API se hacen con **Postman** (decisión del grupo del 13-09; el profesor citó Bruno solo como ejemplo). La colección está en `docs/api/postman/coleccion-laminas.postman_collection.json` y se verificó con Newman sobre una base limpia: **30 requests y 31 assertions, 0 fallos** (evidencia 46).
 >
-> Esta guía empieza por **lo que falta** (secciones 0 a 5). La lista completa de capturas y las reglas del informe quedan como referencia en las secciones 6 a 8.
+> Las capturas y el informe **ya están listos** (sección 0). Las secciones 1 a 5 explican cómo se tomaron y cómo regenerar el informe si hay que repetir alguna; las secciones 6 a 8 son la referencia y la lista de entrega.
 
 ---
 
-## 0. Estado de las capturas (13-09-2026)
+## 0. Estado de las capturas (14-09-2026)
 
-Todas se guardan en `docs/evidencias/` con el **nombre exacto** que aparece aquí.
+**Las 47 capturas están tomadas, revisadas una por una y dentro del informe**, así que no queda ninguna pendiente. Todas viven en `docs/evidencias/` con el **nombre exacto** que aparece en la sección 6.
 
-| Estado | Capturas | Qué hacer |
-|--------|----------|-----------|
-| ✅ Listas (tuyas) | 02, 03, 07, 11 | Nada |
-| ✅ Listas (terminal, generadas y verificadas) | 05, 06, 08, 09, 42, 44, 45, 46, 47 | Nada. No las edites |
-| 🔁 **Repetir** | **01**, **04**, **39**, **41**, **43** | Ver por qué en la tabla de abajo |
-| ❌ **Faltan** | **10** y **12 a 38** y **40** | Pasos 2 y 3 |
+| Origen | Capturas | Nota |
+|--------|----------|------|
+| Pantalla (Initializr, editor, Swagger, DBeaver) | 01, 02, 03, 04, 07, 10, 11, 43 | Tomadas a mano |
+| Postman (requests 12 a 41 de la colección) | 12 a 41 | Una por prueba: caso feliz y casos de error |
+| Terminal (script de capturas) | 05, 06, 08, 09, 42, 44, 45, 46, 47 | Generadas de la salida real de cada comando. No las edites |
 
-Por qué hay que repetir cada una:
+Verificado el 14-09: están los 47 `.png` (sección 4), el PDF tiene 14 páginas en Arial y el ZIP coincide con el repositorio.
 
-| # | Lo que muestra hoy | Lo que debe mostrar |
-|---|--------------------|---------------------|
-| 01 | Gradle, Java 17, `com.example`, `demo`, sin dependencias | Maven, Java 21, `cl.ipss`, `coleccion-laminas` y 6 dependencias (paso 2.1) |
-| 04 | La carpeta `java` cerrada | Los paquetes `audit`, `config`, `controller`… abiertos (paso 2.2) |
-| 39 | Swagger con la lámina 1 de ejemplo | **Postman**, request 39 de la colección (paso 3) |
-| 41 | Swagger con el álbum 1 de ejemplo | **Postman**, request 41 de la colección (paso 3) |
-| 43 | `NumerosUnicos.java` (la anotación) | `NumerosUnicosValidator.java` (la clase que valida) (paso 2.3) |
+### Si hay que repetir alguna captura
 
-En total son **34 capturas**: 5 que se repiten y 29 que faltan. Al guardar una que se repite, acepta **Reemplazar** el archivo anterior.
+1. Las de Postman (12 a 41) **necesitan la base recién creada**: la request 12 crea el álbum *Qatar 2022* y falla con 409 si ya existe. Deja la base limpia con `docker compose down -v` (⚠️ borra datos y fotos) y `docker compose up -d --build`, o elimina solo ese álbum con `curl -X DELETE http://localhost:8080/api/albumes/{id}`.
+2. Repite la secuencia completa de la sección 3, porque las requests encadenan variables (`albumId`, `laminaId`).
+3. Al guardar, usa el mismo nombre de archivo y acepta **Reemplazar**.
+4. Regenera el informe (sección 5) y rehaz el ZIP: las cifras y las figuras se toman de `docs/evidencias/`.
 
 ---
 
@@ -263,7 +259,7 @@ for f in 01-initializr 02-pom-dependencias 03-application-properties 04-estructu
   44-script-e2e 45-mvnw-verify 46-newman 47-resumen-suites; do [ -f "$f.png" ] || echo "FALTA $f.png"; done; echo "revision terminada"
 ```
 
-Si solo imprime `revision terminada`, están las 47. El comando no detecta una captura equivocada: revisa las 5 que se repiten (01, 04, 39, 41 y 43).
+Si solo imprime `revision terminada`, están las 47 (así se verificó el 14-09). El comando comprueba que el archivo exista, no que muestre lo correcto: si repites alguna, ábrela y revísala antes de regenerar el informe.
 
 ---
 
@@ -380,11 +376,12 @@ Cada captura generada por comando tiene al lado su `.txt` con la salida literal.
 1. `ENLACE_GITHUB.txt` ya está creado en la raíz, con la URL del repositorio público.
 2. Informe: `docs/informe/EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.pdf`.
 3. ZIP `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.zip` con el proyecto (sin `target/`, `uploads/`, `.env`, `grande.png` ni material del curso), el PDF, `ENLACE_GITHUB.txt` y `docs/evidencias/`.
-4. Revisa antes de subir:
-   - [ ] Están las 47 capturas (sección 4) y las 5 repetidas muestran lo correcto
-   - [ ] El PDF abre y tiene entre 5 y 15 páginas
-   - [ ] Arial 12, interlineado 1,15, justificado, páginas numeradas
-   - [ ] Portada con logo, profesor e integrantes
-   - [ ] El ZIP descomprime y `docker compose up -d --build` funciona en limpio
-   - [ ] Commit y push hechos (`git status` limpio)
-5. Súbelo a la plataforma **antes del 17-09-2026**.
+4. Revisado antes de subir (verificación del 14-09-2026):
+   - [x] Están las 47 capturas (sección 4) y cada una muestra lo que dice su nombre
+   - [x] El PDF abre y tiene 14 páginas (el máximo es 15, con el Anexo A incluido)
+   - [x] Arial 12, interlineado 1,15, justificado, páginas numeradas (`pdffonts` solo lista ArialMT, Arial-BoldMT y Arial-ItalicMT)
+   - [x] Portada con logo, profesor e integrantes
+   - [x] El ZIP descomprime y `docker compose up -d --build` funciona en limpio; adentro no va material del curso (solo el PDF del informe, sin el enunciado ni la rúbrica)
+   - [x] Las tres suites pasan: `./mvnw verify` 11/0, `pruebas/e2e.sh` 110/0 y Newman 30 requests / 31 assertions sobre base limpia
+   - [x] Commit y push hechos (`git status` limpio, `main` al día con `origin/main`)
+5. **Único paso que queda:** súbelo a la plataforma **antes del 17-09-2026**.
