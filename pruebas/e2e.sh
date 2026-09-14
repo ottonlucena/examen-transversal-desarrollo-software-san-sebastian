@@ -61,6 +61,8 @@ echo "===== 1. ALBUMES (CRUD) ====="
 N="Album e2e $RANDOM$RANDOM"
 req POST /api/albumes 201 "Crear album valido" "{\"nombre\":\"$N\",\"imagen\":\"https://ejemplo.cl/portada.png\",\"fechaLanzamiento\":\"2026-05-01\",\"tipoLaminas\":\"ADHESIVA\",\"totalLaminas\":10,\"editorial\":\"Panini\"}"
 A=$(py 'd["id"]')
+req GET /api/albumes/$A 200 "Obtener album creado"
+igual "$(py 'd["nombre"]')" "$N" "nombre del album obtenido"
 req POST /api/albumes 409 "Nombre duplicado (distinta mayuscula)" "{\"nombre\":\"${N^^}\",\"fechaLanzamiento\":\"2026-05-01\",\"tipoLaminas\":\"ADHESIVA\",\"totalLaminas\":10}"
 req POST /api/albumes 400 "Validacion: nombre vacio, total 0, fecha futura, url" '{"nombre":" ","imagen":"no-es-url","fechaLanzamiento":"2999-01-01","tipoLaminas":"ADHESIVA","totalLaminas":0}'
 req POST /api/albumes 400 "Enum inexistente en tipoLaminas" '{"nombre":"X","fechaLanzamiento":"2026-01-01","tipoLaminas":"PLASTICO","totalLaminas":5}'
