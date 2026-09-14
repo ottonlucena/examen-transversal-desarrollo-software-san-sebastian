@@ -1,0 +1,7 @@
+# Evidencia generada el 2026-09-13 20:42:35 -0300 (salida literal)
+$ for f in docs/evidencias/45-mvnw-verify.txt docs/evidencias/44-script-e2e.txt docs/evidencias/46-newman.txt; do grep -H -E "^\[INFO\] (Tests run: [0-9]+, Failures: [0-9]+, Errors: [0-9]+, Skipped: [0-9]+$|BUILD)|RESULTADO|│ +(requests|assertions) │" "$f"; done
+docs/evidencias/45-mvnw-verify.txt:[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+docs/evidencias/45-mvnw-verify.txt:[INFO] BUILD SUCCESS
+docs/evidencias/44-script-e2e.txt:===== RESULTADO: 110 OK, 0 FAIL =====
+docs/evidencias/46-newman.txt:│                requests │                30 │                0 │
+docs/evidencias/46-newman.txt:│              assertions │                31 │                0 │

@@ -1,0 +1,1374 @@
+{
+  "info": {
+    "name": "Colección de Láminas API",
+    "description": "Examen Transversal · Desarrollo de Software Web II · Grupo 2 (Valeria Gómez y Otton Lucena).\nRequests numeradas 12 a 41 como las capturas del informe. Ejecutar en orden sobre una base recién creada: cada request usa ids que guardan las anteriores en las variables de la colección.\nLas fotos (33, 35 y 36) usan archivos de docs/api/postman/archivos: en Postman, Settings > General > Working directory = carpeta docs/api/postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Álbumes",
+      "item": [
+        {
+          "name": "12 Crear álbum (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Qatar 2022\",\n  \"imagen\": \"https://ejemplo.cl/qatar-2022.png\",\n  \"fechaLanzamiento\": \"2022-08-24\",\n  \"tipoLaminas\": \"ADHESIVA\",\n  \"totalLaminas\": 20,\n  \"editorial\": \"Panini\",\n  \"descripcion\": \"Álbum creado desde Bruno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"albumId\", pm.response.json().id);",
+                  "pm.test(\"201 Created con header Location\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  pm.expect(pm.response.headers.get(\"location\")).to.contain(\"/api/albumes/\" + pm.response.json().id);",
+                  "});",
+                  "pm.test(\"auditoría registra al usuario del header\", function() {",
+                  "  pm.expect(pm.response.json().auditoria.creadoPor).to.equal(\"equipo\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Validación de datos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \" \",\n  \"imagen\": \"no-es-una-url\",\n  \"fechaLanzamiento\": \"2999-01-01\",\n  \"tipoLaminas\": \"ADHESIVA\",\n  \"totalLaminas\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 con errores por campo\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "  pm.expect(pm.response.json().errores).to.have.all.keys(\"nombre\", \"imagen\", \"fechaLanzamiento\", \"totalLaminas\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Nombre duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"QATAR 2022\",\n  \"fechaLanzamiento\": \"2022-08-24\",\n  \"tipoLaminas\": \"ADHESIVA\",\n  \"totalLaminas\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 nombre ya existe (sin distinguir mayúsculas)\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(409);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 Listar álbumes paginado (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes?page=0&size=5&sort=nombre",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "nombre"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con content y metadatos de página\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().content).to.be.an(\"array\");",
+                  "  pm.expect(pm.response.json().page).to.have.all.keys(\"size\", \"number\", \"totalElements\", \"totalPages\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Álbum inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 en formato ProblemDetail\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(404);",
+                  "  pm.expect(pm.response.json().title).to.equal(\"Recurso no encontrado\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Actualizar álbum (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "bruno"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Qatar 2022\",\n  \"imagen\": \"https://ejemplo.cl/qatar-2022.png\",\n  \"fechaLanzamiento\": \"2022-08-24\",\n  \"tipoLaminas\": \"ADHESIVA\",\n  \"totalLaminas\": 20,\n  \"editorial\": \"Panini\",\n  \"descripcion\": \"Descripción actualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y modificadoPor actualizado\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().descripcion).to.equal(\"Descripción actualizada\");",
+                  "  pm.expect(pm.response.json().auditoria.modificadoPor).to.equal(\"bruno\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Láminas",
+      "item": [
+        {
+          "name": "18 Crear lámina (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": 20,\n  \"nombre\": \"Lámina de prueba\",\n  \"tipo\": \"NORMAL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"laminaPruebaId\", pm.response.json().id);",
+                  "pm.test(\"201 y lámina FALTANTE (cantidad 0)\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  pm.expect(pm.response.json().estado).to.equal(\"FALTANTE\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 Número fuera de rango (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": 21,\n  \"nombre\": \"Fuera de rango\",\n  \"tipo\": \"NORMAL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 el número excede el total del álbum\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(409);",
+                  "  pm.expect(pm.response.json().detail).to.contain(\"excede\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 Listar láminas por tipo (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas?tipo=NORMAL",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "NORMAL"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 y solo láminas del tipo pedido\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.response.json().forEach(function(l) { pm.expect(l.tipo).to.equal(\"NORMAL\"); });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "21 Actualizar lámina (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "bruno"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{laminaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{laminaPruebaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": 20,\n  \"nombre\": \"Lámina de prueba editada\",\n  \"tipo\": \"ESPECIAL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con los datos nuevos\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().tipo).to.equal(\"ESPECIAL\");",
+                  "  pm.expect(pm.response.json().auditoria.modificadoPor).to.equal(\"bruno\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "22 Eliminar lámina (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "carla"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{laminaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{laminaPruebaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"204 sin contenido\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Colección (funcionalidades especiales)",
+      "item": [
+        {
+          "name": "23 Carga en lote (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "lote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"laminas\": [\n    { \"numero\": 1, \"nombre\": \"Trofeo\", \"tipo\": \"ESPECIAL\" },\n    { \"numero\": 2, \"nombre\": \"Balón oficial\", \"tipo\": \"ESPECIAL\" },\n    { \"numero\": 3, \"nombre\": \"Mascota oficial\", \"tipo\": \"BRILLANTE\" },\n    { \"numero\": 4, \"nombre\": \"Escudo Argentina\", \"tipo\": \"ESCUDO\" },\n    { \"numero\": 5, \"nombre\": \"Escudo Francia\", \"tipo\": \"ESCUDO\" },\n    { \"numero\": 6, \"nombre\": \"Escudo Croacia\", \"tipo\": \"ESCUDO\" },\n    { \"numero\": 7, \"nombre\": \"Escudo Marruecos\", \"tipo\": \"ESCUDO\" },\n    { \"numero\": 8, \"nombre\": \"Estadio Lusail\", \"tipo\": \"NORMAL\" },\n    { \"numero\": 9, \"nombre\": \"Plantel Argentina\", \"tipo\": \"NORMAL\" },\n    { \"numero\": 10, \"nombre\": \"Plantel Francia\", \"tipo\": \"NORMAL\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const idDe = (numero) => pm.response.json().find((l) => l.numero === numero).id;",
+                  "pm.collectionVariables.set(\"lamina2Id\", idDe(2));",
+                  "pm.collectionVariables.set(\"lamina3Id\", idDe(3));",
+                  "pm.collectionVariables.set(\"lamina4Id\", idDe(4));",
+                  "pm.test(\"201 con las 10 láminas creadas\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  pm.expect(pm.response.json()).to.have.lengthOf(10);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "24 Lote con conflictos (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "lote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"laminas\": [\n    { \"numero\": 10, \"nombre\": \"Ya existe\", \"tipo\": \"NORMAL\" },\n    { \"numero\": 25, \"nombre\": \"Fuera de rango\", \"tipo\": \"NORMAL\" },\n    { \"numero\": 11, \"nombre\": \"Válida\", \"tipo\": \"NORMAL\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 informa cada posición con problema y no crea ninguna\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(409);",
+                  "  pm.expect(pm.response.json().errores).to.have.all.keys(\"laminas[0].numero\", \"laminas[1].numero\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "25 Lote con números repetidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "lote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"laminas\": [\n    { \"numero\": 11, \"nombre\": \"Primera\", \"tipo\": \"NORMAL\" },\n    { \"numero\": 11, \"nombre\": \"Segunda\", \"tipo\": \"NORMAL\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 del validador @NumerosUnicos\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "  pm.expect(pm.response.json().errores.laminas).to.contain(\"repetidos: 11\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "26 Registrar obtenidas (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "registrar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeros\": [1, 2, 2, 3, 3, 3]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 suma una copia por aparición\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().copiasRegistradas).to.equal(6);",
+                  "  pm.expect(pm.response.json().laminas.map((l) => l.cantidad)).to.eql([1, 2, 3]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "27 Registrar número no catalogado (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "registrar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeros\": [1, 99]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 y no se registra ninguna copia\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(409);",
+                  "  pm.expect(pm.response.json().errores.numeros).to.contain(\"99\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "28 Restar una copia (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina3Id}}/cantidad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina3Id}}",
+                "cantidad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delta\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 la lámina 3 pasa de 3 a 2 copias\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().cantidad).to.equal(2);",
+                  "  pm.expect(pm.response.json().repetidas).to.equal(1);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "29 Cantidad negativa (409)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina4Id}}/cantidad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina4Id}}",
+                "cantidad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delta\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 la lámina 4 no tiene copias\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(409);",
+                  "  pm.expect(pm.response.json().detail).to.contain(\"negativa\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "30 Láminas faltantes (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/faltantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "faltantes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 sin copias (4-10) y no catalogadas (11-20)\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().laminas.map((l) => l.numero)).to.eql([4, 5, 6, 7, 8, 9, 10]);",
+                  "  pm.expect(pm.response.json().numerosNoCatalogados).to.eql([11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);",
+                  "  pm.expect(pm.response.json().totalFaltantes).to.equal(17);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "31 Láminas repetidas (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/laminas/repetidas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "laminas",
+                "repetidas"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con la cantidad de repetidas de cada lámina\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().laminas.map((l) => [l.numero, l.repetidas])).to.eql([[2, 1], [3, 1]]);",
+                  "  pm.expect(pm.response.json().laminasRepetidas).to.equal(2);",
+                  "  pm.expect(pm.response.json().totalCopiasRepetidas).to.equal(2);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "32 Resumen del álbum (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "resumen"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con totales y porcentaje\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().catalogadas).to.equal(10);",
+                  "  pm.expect(pm.response.json().obtenidas).to.equal(3);",
+                  "  pm.expect(pm.response.json().faltantes).to.equal(17);",
+                  "  pm.expect(pm.response.json().porcentajeCompletado).to.equal(15);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Fotos de láminas",
+      "item": [
+        {
+          "name": "33 Subir foto (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina2Id}}/foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina2Id}}",
+                "foto"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": "archivos/lamina.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con fotoUrl\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().fotoUrl).to.equal(\"/api/laminas/\" + pm.collectionVariables.get(\"lamina2Id\") + \"/foto\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "34 Ver foto (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina2Id}}/foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina2Id}}",
+                "foto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con la imagen PNG\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.headers.get(\"content-type\")).to.equal(\"image/png\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "35 Archivo que no es imagen (415)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina3Id}}/foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina3Id}}",
+                "foto"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": "archivos/falsa.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"415 aunque la extensión sea .png\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(415);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "36 Archivo mayor a 5 MB (413)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina3Id}}/foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina3Id}}",
+                "foto"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": "archivos/grande.png"
+                }
+              ]
+            },
+            "description": "El archivo grande no se versiona. Generarlo antes de ejecutar esta request (desde docs/api/postman):\npython3 -c \"import os; open('archivos/grande.png','wb').write(b'\\x89PNG\\r\\n\\x1a\\n' + os.urandom(6*1024*1024))\""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"413 supera el máximo de 5 MB\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(413);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "37 Quitar foto (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "equipo"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{lamina2Id}}/foto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{lamina2Id}}",
+                "foto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"204 sin contenido\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Auditoría",
+      "item": [
+        {
+          "name": "38 Auditoría con X-Usuario (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "ana"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Qatar 2022\",\n  \"imagen\": \"https://ejemplo.cl/qatar-2022.png\",\n  \"fechaLanzamiento\": \"2022-08-24\",\n  \"tipoLaminas\": \"ADHESIVA\",\n  \"totalLaminas\": 20,\n  \"editorial\": \"Panini\",\n  \"descripcion\": \"Revisado por ana\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"creadoPor se conserva y modificadoPor toma el header\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().auditoria.creadoPor).to.equal(\"equipo\");",
+                  "  pm.expect(pm.response.json().auditoria.modificadoPor).to.equal(\"ana\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "39 Historial de lámina eliminada (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/laminas/{{laminaPruebaId}}/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "laminas",
+                "{{laminaPruebaId}}",
+                "historial"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con creación, modificación y eliminación\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().map((r) => r.operacion)).to.eql([\"CREACION\", \"MODIFICACION\", \"ELIMINACION\"]);",
+                  "  pm.expect(pm.response.json().map((r) => r.usuario)).to.eql([\"equipo\", \"bruno\", \"carla\"]);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "40 Eliminar álbum (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario",
+                "value": "diego"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"204 sin contenido\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "41 Historial de álbum eliminado (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albumes/{{albumId}}/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "albumes",
+                "{{albumId}}",
+                "historial"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 con todas las revisiones hasta la eliminación\", function() {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().map((r) => r.operacion)).to.eql([\"CREACION\", \"MODIFICACION\", \"MODIFICACION\", \"ELIMINACION\"]);",
+                  "  pm.expect(pm.response.json()[pm.response.json().length - 1].usuario).to.equal(\"diego\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "albumId",
+      "value": ""
+    },
+    {
+      "key": "laminaPruebaId",
+      "value": ""
+    },
+    {
+      "key": "lamina2Id",
+      "value": ""
+    },
+    {
+      "key": "lamina3Id",
+      "value": ""
+    },
+    {
+      "key": "lamina4Id",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ docker compose exec -T -e MYSQL_PWD=coleccion mysql mysql -ucoleccion coleccion_laminas -t -e "SELECT r.id AS rev, FROM_UNIXTIME(r.revtstmp/1000) AS fecha, r.usuario, a.id AS lamina, a.revtype, a.numero, a.cantidad FROM lamina_aud a JOIN revinfo r ON r.id = a.rev ORDER BY r.id DESC LIMIT 15;"
+# Ejecutada inmediatamente despues de la corrida de Newman (46); revtype 0=ADD, 1=MOD, 2=DEL
++-----+--------------------------+---------+--------+---------+--------+----------+
+| rev | fecha                    | usuario | lamina | revtype | numero | cantidad |
++-----+--------------------------+---------+--------+---------+--------+----------+
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     48 |       2 |      5 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     47 |       2 |      4 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     49 |       2 |      6 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     51 |       2 |      8 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     50 |       2 |      7 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     52 |       2 |      9 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     53 |       2 |     10 |        0 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     45 |       2 |      2 |        2 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     46 |       2 |      3 |        2 |
+|  37 | 2026-09-13 20:40:41.5310 | diego   |     44 |       2 |      1 |        1 |
+|  35 | 2026-09-13 20:40:41.3840 | equipo  |     45 |       1 |      2 |        2 |
+|  34 | 2026-09-13 20:40:41.2410 | equipo  |     45 |       1 |      2 |        2 |
+|  33 | 2026-09-13 20:40:41.0510 | equipo  |     46 |       1 |      3 |        2 |
+|  32 | 2026-09-13 20:40:40.9360 | equipo  |     44 |       1 |      1 |        1 |
+|  32 | 2026-09-13 20:40:40.9360 | equipo  |     45 |       1 |      2 |        2 |
++-----+--------------------------+---------+--------+---------+--------+----------+

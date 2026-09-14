@@ -1,0 +1,12 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ docker compose exec -T -e MYSQL_PWD=coleccion mysql mysql -ucoleccion coleccion_laminas -t -e "SHOW TABLES;"
++-----------------------------+
+| Tables_in_coleccion_laminas |
++-----------------------------+
+| album                       |
+| album_aud                   |
+| flyway_schema_history       |
+| lamina                      |
+| lamina_aud                  |
+| revinfo                     |
++-----------------------------+

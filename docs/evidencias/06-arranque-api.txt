@@ -1,0 +1,9 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ docker compose logs --no-log-prefix api | grep -E "Migrating|Successfully applied|Started"
+2026-09-13T20:40:17.419-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `coleccion_laminas` to version "1 - crear tabla album"
+2026-09-13T20:40:17.563-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `coleccion_laminas` to version "2 - crear tabla lamina"
+2026-09-13T20:40:17.740-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `coleccion_laminas` to version "3 - agregar columnas auditoria"
+2026-09-13T20:40:17.989-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `coleccion_laminas` to version "4 - crear tablas envers"
+2026-09-13T20:40:18.202-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `coleccion_laminas` to version "5 - datos semilla"
+2026-09-13T20:40:18.289-03:00  INFO 1 --- [coleccion-laminas] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 5 migrations to schema `coleccion_laminas`, now at version v5 (execution time 00:00.588s)
+2026-09-13T20:40:25.695-03:00  INFO 1 --- [coleccion-laminas] [           main] c.i.c.ColeccionLaminasApplication        : Started ColeccionLaminasApplication in 15.729 seconds (process running for 16.926)

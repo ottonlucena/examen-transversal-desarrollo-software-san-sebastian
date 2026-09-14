@@ -9,8 +9,12 @@
 # Fotos subidas en desarrollo
 uploads/
 
-# Archivo de 6 MB para la prueba 413 de Bruno (se genera localmente, ver 36-foto-grande-413.bru)
-docs/api/bruno/archivos/grande.png
+# Archivo de 6 MB para la prueba 413 (request 36 de la coleccion Postman); se genera localmente
+docs/api/postman/archivos/grande.png
+
+# Informe: el .docx es intermedio (se entrega solo el PDF); build/ guarda la primera pasada del indice
+docs/informe/*.docx
+docs/informe/build/
 
 # IDE / SO
 .idea/

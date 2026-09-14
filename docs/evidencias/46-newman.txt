@@ -1,0 +1,154 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ npx -y newman run docs/api/postman/coleccion-laminas.postman_collection.json --working-dir docs/api/postman --color off
+(node:524865) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Colección de Láminas API
+
+❏ 1. Álbumes
+↳ 12 Crear álbum (201)
+  POST http://localhost:8080/api/albumes [201 Created, 573B, 63ms]
+  ✓  201 Created con header Location
+  ✓  auditoría registra al usuario del header
+
+↳ 13 Validación de datos (400)
+  POST http://localhost:8080/api/albumes [400 Bad Request, 552B, 10ms]
+  ✓  400 con errores por campo
+
+↳ 14 Nombre duplicado (409)
+  POST http://localhost:8080/api/albumes [409 Conflict, 367B, 14ms]
+  ✓  409 nombre ya existe (sin distinguir mayúsculas)
+
+↳ 15 Listar álbumes paginado (200)
+  GET http://localhost:8080/api/albumes?page=0&size=5&sort=nombre [200 OK, 1.34kB, 15ms]
+  ✓  200 con content y metadatos de página
+
+↳ 16 Álbum inexistente (404)
+  GET http://localhost:8080/api/albumes/999999 [404 Not Found, 348B, 11ms]
+  ✓  404 en formato ProblemDetail
+
+↳ 17 Actualizar álbum (200)
+  PUT http://localhost:8080/api/albumes/7 [200 OK, 512B, 42ms]
+  ✓  200 y modificadoPor actualizado
+
+❏ 2. Láminas
+↳ 18 Crear lámina (201)
+  POST http://localhost:8080/api/albumes/7/laminas [201 Created, 501B, 42ms]
+  ✓  201 y lámina FALTANTE (cantidad 0)
+
+↳ 19 Número fuera de rango (409)
+  POST http://localhost:8080/api/albumes/7/laminas [409 Conflict, 388B, 13ms]
+  ✓  409 el número excede el total del álbum
+
+↳ 20 Listar láminas por tipo (200)
+  GET http://localhost:8080/api/albumes/7/laminas?tipo=NORMAL [200 OK, 443B, 13ms]
+  ✓  200 y solo láminas del tipo pedido
+
+↳ 21 Actualizar lámina (200)
+  PUT http://localhost:8080/api/laminas/43 [200 OK, 450B, 38ms]
+  ✓  200 con los datos nuevos
+
+↳ 22 Eliminar lámina (204)
+  DELETE http://localhost:8080/api/laminas/43 [204 No Content, 112B, 26ms]
+  ✓  204 sin contenido
+
+❏ 3. Colección (funcionalidades especiales)
+↳ 23 Carga en lote (201)
+  POST http://localhost:8080/api/albumes/7/laminas/lote [201 Created, 2.99kB, 110ms]
+  ✓  201 con las 10 láminas creadas
+
+↳ 24 Lote con conflictos (409)
+  POST http://localhost:8080/api/albumes/7/laminas/lote [409 Conflict, 548B, 15ms]
+  ✓  409 informa cada posición con problema y no crea ninguna
+
+↳ 25 Lote con números repetidos (400)
+  POST http://localhost:8080/api/albumes/7/laminas/lote [400 Bad Request, 399B, 8ms]
+  ✓  400 del validador @NumerosUnicos
+
+↳ 26 Registrar obtenidas (200)
+  POST http://localhost:8080/api/albumes/7/laminas/registrar [200 OK, 1.03kB, 51ms]
+  ✓  200 suma una copia por aparición
+
+↳ 27 Registrar número no catalogado (409)
+  POST http://localhost:8080/api/albumes/7/laminas/registrar [409 Conflict, 444B, 39ms]
+  ✓  409 y no se registra ninguna copia
+
+↳ 28 Restar una copia (200)
+  PATCH http://localhost:8080/api/laminas/46/cantidad [200 OK, 441B, 30ms]
+  ✓  200 la lámina 3 pasa de 3 a 2 copias
+
+↳ 29 Cantidad negativa (409)
+  PATCH http://localhost:8080/api/laminas/47/cantidad [409 Conflict, 398B, 12ms]
+  ✓  409 la lámina 4 no tiene copias
+
+↳ 30 Láminas faltantes (200)
+  GET http://localhost:8080/api/albumes/7/laminas/faltantes [200 OK, 2.25kB, 19ms]
+  ✓  200 sin copias (4-10) y no catalogadas (11-20)
+
+↳ 31 Láminas repetidas (200)
+  GET http://localhost:8080/api/albumes/7/laminas/repetidas [200 OK, 796B, 16ms]
+  ✓  200 con la cantidad de repetidas de cada lámina
+
+↳ 32 Resumen del álbum (200)
+  GET http://localhost:8080/api/albumes/7/resumen [200 OK, 325B, 15ms]
+  ✓  200 con totales y porcentaje
+
+❏ 4. Fotos de láminas
+↳ 33 Subir foto (200)
+  POST http://localhost:8080/api/laminas/45/foto (node:524865) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+[200 OK, 457B, 44ms]
+  ✓  200 con fotoUrl
+
+↳ 34 Ver foto (200)
+  GET http://localhost:8080/api/laminas/45/foto [200 OK, 8.03kB, 10ms]
+  ✓  200 con la imagen PNG
+
+↳ 35 Archivo que no es imagen (415)
+  POST http://localhost:8080/api/laminas/46/foto [415 Unsupported Media Type, 371B, 12ms]
+  ✓  415 aunque la extensión sea .png
+
+↳ 36 Archivo mayor a 5 MB (413)
+  POST http://localhost:8080/api/laminas/46/foto [413 Request Entity Too Large, 355B, 6ms]
+  ✓  413 supera el máximo de 5 MB
+
+↳ 37 Quitar foto (204)
+  DELETE http://localhost:8080/api/laminas/45/foto [204 No Content, 112B, 30ms]
+  ✓  204 sin contenido
+
+❏ 5. Auditoría
+↳ 38 Auditoría con X-Usuario (200)
+  PUT http://localhost:8080/api/albumes/7 [200 OK, 502B, 32ms]
+  ✓  creadoPor se conserva y modificadoPor toma el header
+
+↳ 39 Historial de lámina eliminada (200)
+  GET http://localhost:8080/api/laminas/43/historial [200 OK, 905B, 13ms]
+  ✓  200 con creación, modificación y eliminación
+
+↳ 40 Eliminar álbum (204)
+  DELETE http://localhost:8080/api/albumes/7 [204 No Content, 112B, 67ms]
+  ✓  204 sin contenido
+
+↳ 41 Historial de álbum eliminado (200)
+  GET http://localhost:8080/api/albumes/7/historial [200 OK, 1.4kB, 11ms]
+  ✓  200 con todas las revisiones hasta la eliminación
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                30 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                30 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                 0 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │                31 │                0 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 1448ms                                     │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 22.57kB (approx)                          │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 27ms [min: 6ms, max: 110ms, s.d.: 22ms] │
+└────────────────────────────────────────────────────────────────┘

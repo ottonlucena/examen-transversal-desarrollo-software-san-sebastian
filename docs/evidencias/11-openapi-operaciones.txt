@@ -1,0 +1,26 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ curl -s http://localhost:8080/v3/api-docs | python3 -c "import json,sys; d=json.load(sys.stdin); ops=[(m.upper(),p) for p,v in d[\"paths\"].items() for m in v if m in (\"get\",\"post\",\"put\",\"patch\",\"delete\")]; print(\"operaciones:\",len(ops)); print(\"rutas:\",len(d[\"paths\"])); print(\"tags:\",[t[\"name\"] for t in d.get(\"tags\",[])]); [print(m,p) for m,p in sorted(ops,key=lambda x:(x[1],x[0]))]"
+operaciones: 21
+rutas: 13
+tags: ['4. Fotos de láminas', '5. Auditoría', '2. Láminas', '1. Álbumes', '3. Colección']
+GET /api/albumes
+POST /api/albumes
+GET /api/albumes/{albumId}/laminas
+POST /api/albumes/{albumId}/laminas
+GET /api/albumes/{albumId}/laminas/faltantes
+POST /api/albumes/{albumId}/laminas/lote
+POST /api/albumes/{albumId}/laminas/registrar
+GET /api/albumes/{albumId}/laminas/repetidas
+GET /api/albumes/{albumId}/resumen
+DELETE /api/albumes/{id}
+GET /api/albumes/{id}
+PUT /api/albumes/{id}
+GET /api/albumes/{id}/historial
+DELETE /api/laminas/{id}
+GET /api/laminas/{id}
+PUT /api/laminas/{id}
+PATCH /api/laminas/{id}/cantidad
+DELETE /api/laminas/{id}/foto
+GET /api/laminas/{id}/foto
+POST /api/laminas/{id}/foto
+GET /api/laminas/{id}/historial

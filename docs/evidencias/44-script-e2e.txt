@@ -1,0 +1,209 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ bash pruebas/e2e.sh
+===== 1. ALBUMES (CRUD) =====
+[OK] Crear album valido                                         POST /api/albumes -> 201 (esperado 201)
+       {"id":3,"nombre":"Album e2e 2259123028","imagen":"https://ejemplo.cl/portada.png","fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":"Panini","descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:29.126748","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:29.126748","modificadoPor":"sistema"}}
+[OK] Obtener album creado                                       GET /api/albumes/3 -> 200 (esperado 200)
+       {"id":3,"nombre":"Album e2e 2259123028","imagen":"https://ejemplo.cl/portada.png","fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":"Panini","descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:29.126748","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:29.126748","modificadoPor":"sistema"}}
+   [OK] nombre del album obtenido: Album e2e 2259123028
+[OK] Nombre duplicado (distinta mayuscula)                      POST /api/albumes -> 409 (esperado 409)
+       {"detail":"Ya existe un álbum con el nombre 'ALBUM E2E 2259123028'","instance":"/api/albumes","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:29.470624441Z"}
+[OK] Validacion: nombre vacio, total 0, fecha futura, url       POST /api/albumes -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:29.532377994Z","errores":{"imagen":"La imagen debe ser una URL http(s) válida","totalLaminas":"El álbum debe tener al menos 1 lámina","fechaLanzamiento":"La fecha de lanzamiento no puede estar en el futuro","nombre":"El nombre es obligatorio"}}
+[OK] Enum inexistente en tipoLaminas                            POST /api/albumes -> 400 (esperado 400)
+       {"detail":"El cuerpo no es un JSON válido o contiene valores no permitidos (revise fechas y tipos)","instance":"/api/albumes","status":400,"title":"Solicitud mal formada","timestamp":"2026-09-13T23:40:29.563768708Z"}
+[OK] JSON mal formado                                           POST /api/albumes -> 400 (esperado 400)
+       {"detail":"El cuerpo no es un JSON válido o contiene valores no permitidos (revise fechas y tipos)","instance":"/api/albumes","status":400,"title":"Solicitud mal formada","timestamp":"2026-09-13T23:40:29.589789837Z"}
+[OK] Listar paginado                                            GET /api/albumes?size=2&sort=nombre,desc -> 200 (esperado 200)
+       {"content":[{"id":2,"nombre":"Fauna Chilena","imagen":null,"fechaLanzamiento":"2024-09-01","tipoLaminas":"TARJETA","totalLaminas":12,"editorial":"Editorial Ejemplo","descripcion":"Álbum de ejemplo con animales nativos de Chile","auditoria":{"creadoEn":"2026-09-13T20:40:18.210582","creadoPor":"flyway-V5","modificadoEn":"2026-09-13T20:40:18.210582","modificadoPor":"flyway-V5"}},{"id":1,"nombre":"Co
+[OK] Orden por propiedad inexistente                            GET /api/albumes?sort=noExiste -> 400 (esperado 400)
+       {"detail":"No se puede ordenar por la propiedad 'noExiste'","instance":"/api/albumes","status":400,"title":"Parámetro inválido","timestamp":"2026-09-13T23:40:29.724537096Z"}
+[OK] Album inexistente                                          GET /api/albumes/999999 -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:29.773448929Z"}
+[OK] Id con tipo invalido                                       GET /api/albumes/abc -> 400 (esperado 400)
+       {"detail":"El parámetro 'id' tiene un valor inválido: 'abc'","instance":"/api/albumes/abc","status":400,"title":"Parámetro inválido","timestamp":"2026-09-13T23:40:29.803811208Z"}
+[OK] Actualizar album                                           PUT /api/albumes/3 -> 200 (esperado 200)
+       {"id":3,"nombre":"Album e2e 2259123028","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":12,"editorial":null,"descripcion":"Edicion actualizada","auditoria":{"creadoEn":"2026-09-13T20:40:29.126748","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:29.865105","modificadoPor":"sistema"}}
+===== 2. LAMINAS (CRUD) =====
+[OK] Crear lamina 1 (cantidad por defecto 0)                    POST /api/albumes/3/laminas -> 201 (esperado 201)
+       {"id":31,"albumId":3,"numero":1,"nombre":"Escudo Chile","tipo":"ESCUDO","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:29.95081","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:29.95081","modificadoPor":"sistema"}}
+[OK] Crear lamina 5 con 3 copias (repetida)                     POST /api/albumes/3/laminas -> 201 (esperado 201)
+       {"id":32,"albumId":3,"numero":5,"nombre":"Alexis Sanchez","tipo":"BRILLANTE","cantidad":3,"repetidas":2,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.060835","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.060835","modificadoPor":"sistema"}}
+[OK] Numero duplicado en el album                               POST /api/albumes/3/laminas -> 409 (esperado 409)
+       {"detail":"El álbum ya tiene una lámina con el número 1","instance":"/api/albumes/3/laminas","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:30.143839499Z"}
+[OK] Numero mayor al total del album                            POST /api/albumes/3/laminas -> 409 (esperado 409)
+       {"detail":"El número 13 excede el total de láminas del álbum (12)","instance":"/api/albumes/3/laminas","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:30.181612380Z"}
+[OK] Validacion: numero 0, cantidad negativa                    POST /api/albumes/3/laminas -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/3/laminas","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:30.209294162Z","errores":{"numero":"El número de la lámina debe ser mayor o igual a 1","nombre":"El nombre de la lámina es obligatorio","cantidad":"La cantidad no puede ser negativa"}}
+[OK] Crear lamina en album inexistente                          POST /api/albumes/999999/laminas -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/laminas","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:30.251811955Z"}
+[OK] Listar laminas del album                                   GET /api/albumes/3/laminas -> 200 (esperado 200)
+       [{"id":31,"albumId":3,"numero":1,"nombre":"Escudo Chile","tipo":"ESCUDO","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:29.95081","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:29.95081","modificadoPor":"sistema"}},{"id":32,"albumId":3,"numero":5,"nombre":"Alexis Sanchez","tipo":"BRILLANTE","cantidad":3,"repetidas":2,"estado":"REPETI
+[OK] Filtrar por tipo                                           GET /api/albumes/3/laminas?tipo=BRILLANTE -> 200 (esperado 200)
+       [{"id":32,"albumId":3,"numero":5,"nombre":"Alexis Sanchez","tipo":"BRILLANTE","cantidad":3,"repetidas":2,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.060835","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.060835","modificadoPor":"sistema"}}]
+[OK] Filtro con tipo invalido                                   GET /api/albumes/3/laminas?tipo=XYZ -> 400 (esperado 400)
+       {"detail":"El parámetro 'tipo' tiene un valor inválido: 'XYZ'","instance":"/api/albumes/3/laminas","status":400,"title":"Parámetro inválido","timestamp":"2026-09-13T23:40:30.379700440Z"}
+[OK] Listar laminas de album inexistente                        GET /api/albumes/999999/laminas -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/laminas","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:30.409985473Z"}
+[OK] Obtener lamina                                             GET /api/laminas/32 -> 200 (esperado 200)
+       {"id":32,"albumId":3,"numero":5,"nombre":"Alexis Sanchez","tipo":"BRILLANTE","cantidad":3,"repetidas":2,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.060835","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.060835","modificadoPor":"sistema"}}
+[OK] Actualizar lamina (sin cantidad = conserva)                PUT /api/laminas/31 -> 200 (esperado 200)
+       {"id":31,"albumId":3,"numero":2,"nombre":"Escudo Chile dorado","tipo":"ESPECIAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:29.95081","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.482195","modificadoPor":"sistema"}}
+[OK] Actualizar a numero ya usado                               PUT /api/laminas/31 -> 409 (esperado 409)
+       {"detail":"El álbum ya tiene una lámina con el número 5","instance":"/api/laminas/31","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:30.548948863Z"}
+[OK] Reducir total bajo la lamina mayor (5)                     PUT /api/albumes/3 -> 409 (esperado 409)
+       {"detail":"No se puede reducir el total a 3: el álbum tiene registrada la lámina número 5","instance":"/api/albumes/3","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:30.584525398Z"}
+[OK] Eliminar lamina                                            DELETE /api/laminas/31 -> 204 (esperado 204)
+[OK] Lamina eliminada ya no existe                              GET /api/laminas/31 -> 404 (esperado 404)
+       {"detail":"No existe una lámina con id 31","instance":"/api/laminas/31","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:30.674532256Z"}
+[OK] Eliminar album (cascada)                                   DELETE /api/albumes/3 -> 204 (esperado 204)
+[OK] Lamina del album eliminado                                 GET /api/laminas/32 -> 404 (esperado 404)
+       {"detail":"No existe una lámina con id 32","instance":"/api/laminas/32","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:30.774754254Z"}
+[OK] Eliminar album ya eliminado                                DELETE /api/albumes/3 -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 3","instance":"/api/albumes/3","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:30.801804796Z"}
+===== 3. FUNCIONALIDADES ESPECIALES =====
+[OK] Setup: album de 10 laminas                                 POST /api/albumes -> 201 (esperado 201)
+       {"id":4,"nombre":"Album coleccion e2e 757317594","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":null,"descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.829944","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.829944","modificadoPor":"sistema"}}
+[OK] Lote de 8 laminas (1..8)                                   POST /api/albumes/4/laminas/lote -> 201 (esperado 201)
+       [{"id":33,"albumId":4,"numero":1,"nombre":"Jugador 1","tipo":"NORMAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.955082","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.955082","modificadoPor":"sistema"}},{"id":34,"albumId":4,"numero":2,"nombre":"Jugador 2","tipo":"NORMAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","foto
+   [OK] laminas creadas: 8
+[OK] Numeros repetidos dentro del lote (@NumerosUnicos)         POST /api/albumes/4/laminas/lote -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/4/laminas/lote","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.131123529Z","errores":{"laminas":"El lote contiene números repetidos: 9"}}
+[OK] Lote con conflictos: 8 existe, 11 fuera de rango           POST /api/albumes/4/laminas/lote -> 409 (esperado 409)
+       {"detail":"El lote no se cargó: 2 lámina(s) con conflictos","instance":"/api/albumes/4/laminas/lote","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:31.171211281Z","errores":{"laminas[1].numero":"El número 11 excede el total de láminas del álbum (10)","laminas[0].numero":"El álbum ya tiene una lámina con el número 8"}}
+[OK] Lote vacio                                                 POST /api/albumes/4/laminas/lote -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/4/laminas/lote","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.200143738Z","errores":{"laminas":"Debe enviar al menos una lámina"}}
+[OK] Lote con item invalido (numero 0)                          POST /api/albumes/4/laminas/lote -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/4/laminas/lote","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.228864431Z","errores":{"laminas[0].nombre":"El nombre de la lámina es obligatorio","laminas[0].numero":"El número de la lámina debe ser mayor o igual a 1"}}
+[OK] Lote en album inexistente                                  POST /api/albumes/999999/laminas/lote -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/laminas/lote","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:31.273583390Z"}
+[OK] Registrar [1,2,2,3,3,3]                                    POST /api/albumes/4/laminas/registrar -> 200 (esperado 200)
+       {"copiasRegistradas":6,"laminas":[{"id":33,"albumId":4,"numero":1,"nombre":"Jugador 1","tipo":"NORMAL","cantidad":1,"repetidas":0,"estado":"OBTENIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.955082","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:31.329059","modificadoPor":"sistema"}},{"id":34,"albumId":4,"numero":2,"nombre":"Jugador 2","tipo":"NORMAL","cantidad":2,"repet
+   [OK] copias registradas: 6
+   [OK] cantidades: [(1, 1, 'OBTENIDA'), (2, 2, 'REPETIDA'), (3, 3, 'REPETIDA')]
+[OK] Registrar numero no catalogado (todo o nada)               POST /api/albumes/4/laminas/registrar -> 409 (esperado 409)
+       {"detail":"Hay números que no están catalogados en el álbum","instance":"/api/albumes/4/laminas/registrar","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:31.463319297Z","errores":{"numeros":"No existen en el álbum: 99"}}
+[OK] Lamina 1 no cambio tras el rechazo                         GET /api/laminas/33 -> 200 (esperado 200)
+       {"id":33,"albumId":4,"numero":1,"nombre":"Jugador 1","tipo":"NORMAL","cantidad":1,"repetidas":0,"estado":"OBTENIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.955082","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:31.329059","modificadoPor":"sistema"}}
+   [OK] cantidad de lamina 1: 1
+[OK] Registrar lista vacia                                      POST /api/albumes/4/laminas/registrar -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/4/laminas/registrar","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.572284149Z","errores":{"numeros":"Debe enviar al menos un número"}}
+[OK] Registrar numero 0                                         POST /api/albumes/4/laminas/registrar -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/albumes/4/laminas/registrar","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.598174532Z","errores":{"numeros[0]":"Los números deben ser mayores o iguales a 1"}}
+[OK] Restar 1 copia a la lamina 3                               PATCH /api/laminas/35/cantidad -> 200 (esperado 200)
+       {"id":35,"albumId":4,"numero":3,"nombre":"Jugador 3","tipo":"NORMAL","cantidad":2,"repetidas":1,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.96303","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:31.632259","modificadoPor":"sistema"}}
+   [OK] cantidad y repetidas: (2, 1)
+[OK] Restar a lamina sin copias (quedaria negativa)             PATCH /api/laminas/36/cantidad -> 409 (esperado 409)
+       {"detail":"La cantidad no puede quedar negativa: la lámina tiene 0 copia(s)","instance":"/api/laminas/36/cantidad","status":409,"title":"Conflicto con las reglas de negocio","timestamp":"2026-09-13T23:40:31.723288721Z"}
+[OK] Sin delta                                                  PATCH /api/laminas/36/cantidad -> 400 (esperado 400)
+       {"detail":"La solicitud contiene errores de validación","instance":"/api/laminas/36/cantidad","status":400,"title":"Datos inválidos","timestamp":"2026-09-13T23:40:31.763675749Z","errores":{"delta":"El delta es obligatorio"}}
+[OK] Lamina inexistente                                         PATCH /api/laminas/999999/cantidad -> 404 (esperado 404)
+       {"detail":"No existe una lámina con id 999999","instance":"/api/laminas/999999/cantidad","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:31.798623768Z"}
+[OK] Faltantes                                                  GET /api/albumes/4/laminas/faltantes -> 200 (esperado 200)
+       {"albumId":4,"totalLaminas":10,"totalFaltantes":7,"laminas":[{"id":36,"albumId":4,"numero":4,"nombre":"Jugador 4","tipo":"NORMAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.966649","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:30.966649","modificadoPor":"sistema"}},{"id":37,"albumId":4,"numero":5,"nombre":"Jugador 5","tipo":"
+   [OK] faltantes (sin copias, no catalogadas, total): ([4, 5, 6, 7, 8], [9, 10], 7)
+[OK] Repetidas                                                  GET /api/albumes/4/laminas/repetidas -> 200 (esperado 200)
+       {"albumId":4,"laminasRepetidas":2,"totalCopiasRepetidas":2,"laminas":[{"id":34,"albumId":4,"numero":2,"nombre":"Jugador 2","tipo":"NORMAL","cantidad":2,"repetidas":1,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:30.958854","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:31.329298","modificadoPor":"sistema"}},{"id":35,"albumId":4,"numero":3,"nombre":"Jugador 3"
+   [OK] repetidas por lamina y totales: ([(2, 1), (3, 1)], 2, 2)
+[OK] Resumen                                                    GET /api/albumes/4/resumen -> 200 (esperado 200)
+       {"albumId":4,"nombre":"Album coleccion e2e 757317594","totalLaminas":10,"catalogadas":8,"obtenidas":3,"faltantes":7,"laminasRepetidas":2,"copiasRepetidas":2,"porcentajeCompletado":30.0}
+   [OK] totales del resumen: (8, 3, 7, 2, 2, 30.0)
+[OK] Setup: album vacio                                         POST /api/albumes -> 201 (esperado 201)
+       {"id":5,"nombre":"Album coleccion e2e 757317594 vacio","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"TARJETA","totalLaminas":5,"editorial":null,"descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:32.104191","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:32.104191","modificadoPor":"sistema"}}
+[OK] Resumen de album sin laminas                               GET /api/albumes/5/resumen -> 200 (esperado 200)
+       {"albumId":5,"nombre":"Album coleccion e2e 757317594 vacio","totalLaminas":5,"catalogadas":0,"obtenidas":0,"faltantes":5,"laminasRepetidas":0,"copiasRepetidas":0,"porcentajeCompletado":0.0}
+   [OK] totales en cero: (0, 0, 5, 0.0)
+[OK] Faltantes de album inexistente                             GET /api/albumes/999999/laminas/faltantes -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/laminas/faltantes","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:32.279151223Z"}
+[OK] Repetidas de album inexistente                             GET /api/albumes/999999/laminas/repetidas -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/laminas/repetidas","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:32.307845516Z"}
+[OK] Resumen de album inexistente                               GET /api/albumes/999999/resumen -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 999999","instance":"/api/albumes/999999/resumen","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:32.336443984Z"}
+===== 4. FOTOS =====
+[OK] Subir foto PNG                                             POST /api/laminas/34/foto -> 200 (esperado 200)
+       {"id":34,"albumId":4,"numero":2,"nombre":"Jugador 2","tipo":"NORMAL","cantidad":2,"repetidas":1,"estado":"REPETIDA","fotoUrl":"/api/laminas/34/foto","auditoria":{"creadoEn":"2026-09-13T20:40:30.958854","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:32.579271","modificadoPor":"sistema"}}
+   [OK] fotoUrl: /api/laminas/34/foto
+[OK] Descargar foto                                             GET /api/laminas/34/foto -> 200 (esperado 200)
+       Content-Type: image/png, 69 bytes
+   [OK] contenido descargado identico al subido: si
+[OK] Reemplazar por JPEG                                        POST /api/laminas/34/foto -> 200 (esperado 200)
+       {"id":34,"albumId":4,"numero":2,"nombre":"Jugador 2","tipo":"NORMAL","cantidad":2,"repetidas":1,"estado":"REPETIDA","fotoUrl":"/api/laminas/34/foto","auditoria":{"creadoEn":"2026-09-13T20:40:30.958854","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:32.706168","modificadoPor":"sistema"}}
+[OK] Descargar foto reemplazada                                 GET /api/laminas/34/foto -> 200 (esperado 200)
+       Content-Type: image/jpeg, 77 bytes
+   [OK] archivos en el volumen (la foto anterior se borro): 1
+[OK] Archivo de texto con extension .png                        POST /api/laminas/35/foto -> 415 (esperado 415)
+       {"detail":"Solo se permiten imágenes JPEG, PNG o WEBP","instance":"/api/laminas/35/foto","status":415,"title":"Archivo no soportado","timestamp":"2026-09-13T23:40:33.164583961Z"}
+[OK] Archivo vacio                                              POST /api/laminas/35/foto -> 415 (esperado 415)
+       {"detail":"El archivo está vacío","instance":"/api/laminas/35/foto","status":415,"title":"Archivo no soportado","timestamp":"2026-09-13T23:40:33.195238742Z"}
+[OK] Archivo de 6 MB (maximo 5 MB)                              POST /api/laminas/35/foto -> 413 (esperado 413)
+       {"detail":"La foto supera el tamaño máximo permitido (5 MB)","instance":"/api/laminas/35/foto","status":413,"title":"Archivo demasiado grande","timestamp":"2026-09-13T23:40:33.223602958Z"}
+[OK] Multipart sin el campo 'archivo'                           POST /api/laminas/35/foto -> 400 (esperado 400)
+       {"detail":"Envíe la foto en el campo 'archivo' como multipart/form-data","instance":"/api/laminas/35/foto","status":400,"title":"Falta el archivo","timestamp":"2026-09-13T23:40:33.261674277Z"}
+[OK] Enviar JSON en vez de multipart                            POST /api/laminas/35/foto -> 415 (esperado 415)
+       {"detail":"El Content-Type 'application/json' no es aceptado por este endpoint. Soportados: [multipart/form-data]","instance":"/api/laminas/35/foto","status":415,"title":"Tipo de contenido no soportado","timestamp":"2026-09-13T23:40:33.290810047Z"}
+[OK] Foto a lamina inexistente                                  POST /api/laminas/999999/foto -> 404 (esperado 404)
+       {"detail":"No existe una lámina con id 999999","instance":"/api/laminas/999999/foto","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:33.321111283Z"}
+   [OK] los rechazos no dejaron archivos huerfanos: 1
+[OK] Ver foto de lamina sin foto                                GET /api/laminas/35/foto -> 404 (esperado 404)
+       {"detail":"La lámina con id 35 no tiene foto","instance":"/api/laminas/35/foto","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:33.532389508Z"}
+[OK] Quitar foto                                                DELETE /api/laminas/34/foto -> 204 (esperado 204)
+[OK] La foto ya no existe                                       GET /api/laminas/34/foto -> 404 (esperado 404)
+       {"detail":"La lámina con id 34 no tiene foto","instance":"/api/laminas/34/foto","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:33.602449676Z"}
+[OK] Quitar foto inexistente                                    DELETE /api/laminas/34/foto -> 404 (esperado 404)
+       {"detail":"La lámina con id 34 no tiene foto","instance":"/api/laminas/34/foto","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:33.631136636Z"}
+[OK] Subir foto antes de borrar el album                        POST /api/laminas/37/foto -> 200 (esperado 200)
+       {"id":37,"albumId":4,"numero":5,"nombre":"Jugador 5","tipo":"NORMAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":"/api/laminas/37/foto","auditoria":{"creadoEn":"2026-09-13T20:40:30.97055","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:33.659158","modificadoPor":"sistema"}}
+[OK] Eliminar album con foto                                    DELETE /api/albumes/4 -> 204 (esperado 204)
+   [OK] fotos del album borradas del disco: 0
+[OK] Limpieza: album vacio                                      DELETE /api/albumes/5 -> 204 (esperado 204)
+===== 5. AUDITORIA (JPA Auditing + Envers + Flyway) =====
+[OK] Crear album como 'ana'                                     POST /api/albumes -> 201 (esperado 201)  [X-Usuario: ana]
+       {"id":6,"nombre":"Album auditoria e2e 1371021825","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":null,"descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:35.044877","creadoPor":"ana","modificadoEn":"2026-09-13T20:40:35.044877","modificadoPor":"ana"}}
+   [OK] creadoPor/modificadoPor: ('ana', 'ana')
+[OK] Modificar album como 'bruno'                               PUT /api/albumes/6 -> 200 (esperado 200)  [X-Usuario: bruno]
+       {"id":6,"nombre":"Album auditoria e2e 1371021825","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":12,"editorial":null,"descripcion":null,"auditoria":{"creadoEn":"2026-09-13T20:40:35.044877","creadoPor":"ana","modificadoEn":"2026-09-13T20:40:36.206595","modificadoPor":"bruno"}}
+   [OK] creacion intacta, modificacion actualizada: ('ana', 'bruno', True, True)
+[OK] Crear lamina sin header X-Usuario                          POST /api/albumes/6/laminas -> 201 (esperado 201)
+       {"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:36.300555","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:36.300555","modificadoPor":"sistema"}}
+   [OK] usuario por defecto: sistema
+[OK] Crear lamina con header invalido                           POST /api/albumes/6/laminas -> 201 (esperado 201)  [X-Usuario: x y;DROP TABLE]
+       {"id":42,"albumId":6,"numero":2,"nombre":"Otra","tipo":"NORMAL","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:36.41383","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:36.41383","modificadoPor":"sistema"}}
+   [OK] header invalido se ignora: sistema
+[OK] Sumar 2 copias como 'carla'                                PATCH /api/laminas/41/cantidad -> 200 (esperado 200)  [X-Usuario: carla]
+       {"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","cantidad":2,"repetidas":1,"estado":"REPETIDA","fotoUrl":null,"auditoria":{"creadoEn":"2026-09-13T20:40:36.300555","creadoPor":"sistema","modificadoEn":"2026-09-13T20:40:36.501199","modificadoPor":"carla"}}
+   [OK] auditoria tras PATCH: ('sistema', 'carla', 2)
+[OK] Historial del album                                        GET /api/albumes/6/historial -> 200 (esperado 200)
+       [{"revision":20,"fecha":"2026-09-13T20:40:35.047","usuario":"ana","operacion":"CREACION","datos":{"id":6,"nombre":"Album auditoria e2e 1371021825","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":null,"descripcion":null}},{"revision":21,"fecha":"2026-09-13T20:40:36.209","usuario":"bruno","operacion":"MODIFICACION","datos":{"id":6,"nombre":"Album 
+   [OK] revisiones del album: [('CREACION', 'ana', 10), ('MODIFICACION', 'bruno', 12)]
+   [OK] snapshot sin bloque auditoria: False
+[OK] Historial de la lamina                                     GET /api/laminas/41/historial -> 200 (esperado 200)
+       [{"revision":22,"fecha":"2026-09-13T20:40:36.306","usuario":"sistema","operacion":"CREACION","datos":{"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null}},{"revision":24,"fecha":"2026-09-13T20:40:36.506","usuario":"carla","operacion":"MODIFICACION","datos":{"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","
+   [OK] revisiones de la lamina: [('CREACION', 'sistema', 0), ('MODIFICACION', 'carla', 2)]
+[OK] Eliminar album como 'diego'                                DELETE /api/albumes/6 -> 204 (esperado 204)  [X-Usuario: diego]
+[OK] El album ya no existe                                      GET /api/albumes/6 -> 404 (esperado 404)
+       {"detail":"No existe un álbum con id 6","instance":"/api/albumes/6","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:36.898355005Z"}
+[OK] Historial del album eliminado                              GET /api/albumes/6/historial -> 200 (esperado 200)
+       [{"revision":20,"fecha":"2026-09-13T20:40:35.047","usuario":"ana","operacion":"CREACION","datos":{"id":6,"nombre":"Album auditoria e2e 1371021825","imagen":null,"fechaLanzamiento":"2026-05-01","tipoLaminas":"ADHESIVA","totalLaminas":10,"editorial":null,"descripcion":null}},{"revision":21,"fecha":"2026-09-13T20:40:36.209","usuario":"bruno","operacion":"MODIFICACION","datos":{"id":6,"nombre":"Album 
+   [OK] revision de eliminacion con datos: ('ELIMINACION', 'diego', True)
+[OK] Historial de la lamina eliminada con el album              GET /api/laminas/41/historial -> 200 (esperado 200)
+       [{"revision":22,"fecha":"2026-09-13T20:40:36.306","usuario":"sistema","operacion":"CREACION","datos":{"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","cantidad":0,"repetidas":0,"estado":"FALTANTE","fotoUrl":null}},{"revision":24,"fecha":"2026-09-13T20:40:36.506","usuario":"carla","operacion":"MODIFICACION","datos":{"id":41,"albumId":6,"numero":1,"nombre":"Escudo","tipo":"ESCUDO","
+   [OK] eliminacion de la lamina registrada: ('ELIMINACION', 'diego', 6)
+[OK] Historial de album que nunca existio                       GET /api/albumes/999999/historial -> 404 (esperado 404)
+       {"detail":"No hay historial de cambios para el álbum con id 999999","instance":"/api/albumes/999999/historial","status":404,"title":"Recurso no encontrado","timestamp":"2026-09-13T23:40:37.060800319Z"}
+[OK] Historial con id invalido                                  GET /api/laminas/abc/historial -> 400 (esperado 400)
+       {"detail":"El parámetro 'id' tiene un valor inválido: 'abc'","instance":"/api/laminas/abc/historial","status":400,"title":"Parámetro inválido","timestamp":"2026-09-13T23:40:37.084718131Z"}
+--- flyway_schema_history
+n	version	description	success
+1	1	crear tabla album	1
+2	2	crear tabla lamina	1
+3	3	agregar columnas auditoria	1
+4	4	crear tablas envers	1
+5	5	datos semilla	1
+   [OK] migraciones aplicadas con exito (V1..V5): 5
+--- revinfo + lamina_aud de la lamina 41
+rev	fecha	usuario	revtype	numero	cantidad
+22	2026-09-13 20:40:36.3060	sistema	0	1	0
+24	2026-09-13 20:40:36.5060	carla	1	1	2
+25	2026-09-13 20:40:36.8530	diego	2	1	2
+
+===== RESULTADO: 110 OK, 0 FAIL =====

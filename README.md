@@ -4,6 +4,10 @@ Sistema de gestión para coleccionistas de láminas de álbumes: CRUD de álbume
 
 Examen Transversal · Desarrollo de Software Web II · Instituto Profesional San Sebastián
 
+## Integrantes
+
+Grupo 2: **Valeria Gómez** y **Otton Lucena**.
+
 ## Stack
 
 | Componente | Versión |
@@ -11,11 +15,11 @@ Examen Transversal · Desarrollo de Software Web II · Instituto Profesional San
 | Java | 21 |
 | Spring Boot (Web MVC, Data JPA, Validation) | 4.1.1 |
 | MySQL | 8.4 (Docker) |
-| Flyway (migraciones) | gestionado por Spring Boot |
+| Flyway (migraciones) | 12.4 (versión gestionada por Spring Boot) |
 | Hibernate Envers (historial) | 7.4 |
 | springdoc-openapi (Swagger UI) | 3.1.0 |
 | Docker Compose | v2 |
-| Pruebas | JUnit 5, Mockito, MockMvc, Testcontainers, Bruno, script e2e |
+| Pruebas | JUnit 5, Mockito, MockMvc, Testcontainers, Postman (Newman), script e2e |
 
 ## Inicio rápido
 
@@ -41,6 +45,8 @@ curl http://localhost:8080/api/albumes/1/laminas/repetidas
 ```
 
 Para detener los servicios sin perder los datos: `docker compose stop`. Para borrar la base y las fotos: `docker compose down -v` (⚠️ destructivo).
+
+`compose.yaml` fija los nombres de contenedor (`coleccion-mysql`, `coleccion-api`) y publica los puertos 3306 y 8080: si ya hay otra copia del proyecto corriendo, detenla con `docker compose down` en su carpeta antes de levantar esta.
 
 ### Variables de entorno
 
@@ -88,7 +94,7 @@ cd backend && ./mvnw spring-boot:run
 | GET | `/api/albumes/{id}/historial` | Historial de cambios del álbum |
 | GET | `/api/laminas/{id}/historial` | Historial de cambios de la lámina |
 
-Los request y response de cada endpoint, con ejemplos, están en Swagger UI y en la colección Bruno.
+Los request y response de cada endpoint, con ejemplos, están en Swagger UI y en la colección de Postman.
 
 ### Errores
 
@@ -123,17 +129,23 @@ Todos los errores usan el formato RFC 9457 (`application/problem+json`):
 ## Pruebas
 
 ```bash
-cd backend && ./mvnw verify                          # unitarias + MockMvc + integración (Testcontainers, requiere Docker)
-bash pruebas/e2e.sh                                  # 108 comprobaciones end-to-end contra la API levantada
-cd docs/api/bruno && npx @usebruno/cli run -r --env local   # colección Bruno completa
+cd backend && ./mvnw verify                          # 11 tests: 7 unitarios + 3 MockMvc + 1 integración (Testcontainers, requiere Docker)
+bash pruebas/e2e.sh                                  # 110 comprobaciones end-to-end contra la API levantada
+npx newman run docs/api/postman/coleccion-laminas.postman_collection.json --working-dir docs/api/postman   # colección Postman: 30 requests, 31 assertions
 ```
 
-La colección Bruno (`docs/api/bruno`) también se abre en la app de escritorio Bruno (*Open Collection*, entorno `local`). Antes de la request 36 (archivo > 5 MB), genera el archivo grande, que no se versiona:
+La colección `docs/api/postman/coleccion-laminas.postman_collection.json` se importa en Postman (*Import*). Para las fotos, configura en Postman *Settings → General → Working directory* = carpeta `docs/api/postman`. Antes de la request 36 (archivo > 5 MB), genera el archivo grande, que no se versiona:
 
 ```bash
-cd docs/api/bruno
+cd docs/api/postman
 python3 -c "import os; open('archivos/grande.png','wb').write(b'\x89PNG\r\n\x1a\n' + os.urandom(6*1024*1024))"
 ```
+
+## Informe y evidencias
+
+- Informe: `docs/informe/EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.pdf`, con un Anexo A que reúne la captura de cada prueba.
+- Se genera con `python3 docs/informe/generar_informe.py` (requiere `pip install python-docx pillow`, LibreOffice y poppler-utils). Ninguna cifra del informe se escribe a mano: el script las lee de `docs/evidencias/`.
+- `docs/evidencias/` guarda la salida literal de cada comando (`.txt`) y las capturas (`.png`), numeradas como en [`docs/informe/GUIA_INFORME_Y_CAPTURAS.md`](docs/informe/GUIA_INFORME_Y_CAPTURAS.md).
 
 ## Estructura
 
@@ -150,8 +162,9 @@ python3 -c "import os; open('archivos/grande.png','wb').write(b'\x89PNG\r\n\x1a\
 │       ├── validation/       Validador personalizado @NumerosUnicos
 │       ├── audit/  config/   Usuario de auditoría, JPA Auditing, OpenAPI
 │       └── resources/db/migration/   V1..V5
-├── docs/api/bruno/           Colección Bruno (requests numeradas)
-├── docs/informe/             Guía del informe y capturas
+├── docs/api/postman/         Colección Postman (requests 12–41) y archivos para las fotos
+├── docs/informe/             Informe PDF, script que lo genera y guía de capturas
+├── docs/evidencias/          Salidas de comandos (.txt) y capturas (.png) del informe
 └── pruebas/e2e.sh            Pruebas end-to-end
 ```
 

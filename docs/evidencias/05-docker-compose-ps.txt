@@ -1,0 +1,5 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ docker compose ps --format "table {{.Name}}\t{{.Image}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}"
+NAME              IMAGE              SERVICE   STATUS                    PORTS
+coleccion-api     verificacion-api   api       Up 17 seconds             0.0.0.0:8080->8080/tcp, :::8080->8080/tcp
+coleccion-mysql   mysql:8.4          mysql     Up 38 seconds (healthy)   0.0.0.0:3306->3306/tcp, :::3306->3306/tcp, 33060/tcp

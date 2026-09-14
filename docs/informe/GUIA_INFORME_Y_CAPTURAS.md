@@ -1,224 +1,390 @@
-# Guía paso a paso: informe y capturas
+# Guía paso a paso: capturas pendientes, informe y entrega
 
 Examen Transversal · Desarrollo de Software Web II · Prof. Boris Marcelo Belmar Muñoz
-Entrega: **17-09-2026** · Archivo: `EXT_GRUPO_APELLIDO_NOMBRE`
+Grupo 2: Valeria Gómez y Otton Lucena · Archivo: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON` · Entrega: **17-09-2026**
 
-> La colección Bruno (`docs/api/bruno`) tiene **una request por captura, con el mismo número** (12 a 41), ordenadas según su ejecución. Cada request trae asserts que verifican el resultado esperado.
-
----
-
-## 1. Preparar el entorno (una sola vez, el día de las capturas)
-
-1. Parte de una base limpia, para que los ids sean ordenados y reproducibles:
-   ```bash
-   cd ~/Escritorio/EXAMEN-TRANSVERSAL
-   docker compose down -v          # ⚠️ borra la BD y las fotos de desarrollo
-   docker compose up -d --build    # levanta MySQL + API; Flyway aplica V1..V5
-   docker compose ps               # mysql "(healthy)", api "Up"
-   ```
-2. Genera el archivo de 6 MB para la captura 36; no se versiona:
-   ```bash
-   cd docs/api/bruno
-   python3 -c "import os; open('archivos/grande.png','wb').write(b'\x89PNG\r\n\x1a\n' + os.urandom(6*1024*1024))"
-   ```
-3. Abre la app **Bruno** → *Open Collection* → carpeta `docs/api/bruno` → elige el entorno **local** (arriba a la derecha).
-4. Herramienta de captura en Ubuntu:
-   - **Flameshot** (`sudo apt install flameshot`, luego `flameshot gui`), o
-   - `Shift + Impr Pant` para capturar una región.
-
-   Guarda cada imagen en `docs/evidencias/` con el nombre exacto de la tabla de la §3.
-5. Consejos para que las capturas quepan en 10 páginas:
-   - Captura **solo la región útil**: método + URL + status + parte relevante del body (y el header `X-Usuario` cuando corresponda).
-   - Usa zoom al 110–125 % y el mismo tema (claro u oscuro) en todas.
-   - En Bruno, colapsa los arrays largos y deja visibles los totales.
-
-## 2. Orden de ejecución
-
-Ejecuta las requests de Bruno **en orden numérico, sin saltarte ninguna**: cada una usa ids que crean las anteriores (`albumId`, `laminaPruebaId`, `lamina2Id`…).
-
-- Si una request falla o la repites fuera de orden, vuelve al paso 1.1 y empieza de nuevo.
-- Para comprobar antes que todo pasa, corre la colección completa: `cd docs/api/bruno && npx @usebruno/cli run -r --env local`. Termina borrando su álbum de prueba, así que se puede repetir.
+> Las pruebas de la API se hacen con **Postman** (decisión del grupo del 13-09; el profesor citó Bruno solo como ejemplo). La colección está en `docs/api/postman/coleccion-laminas.postman_collection.json` y se verificó con Newman sobre una base limpia: **30 requests y 31 assertions, 0 fallos** (evidencia 46).
+>
+> Esta guía empieza por **lo que falta** (secciones 0 a 5). La lista completa de capturas y las reglas del informe quedan como referencia en las secciones 6 a 8.
 
 ---
 
-## 3. Lista de capturas
+## 0. Estado de las capturas (13-09-2026)
 
-★ = va en el cuerpo del informe (≈ 22). El resto se guarda en `docs/evidencias/` (repo y ZIP) y se cita en la tabla de pruebas del informe.
+Todas se guardan en `docs/evidencias/` con el **nombre exacto** que aparece aquí.
 
-### 3.1 Configuración del proyecto (indicador 1 · 20 pts)
+| Estado | Capturas | Qué hacer |
+|--------|----------|-----------|
+| ✅ Listas (tuyas) | 02, 03, 07, 11 | Nada |
+| ✅ Listas (terminal, generadas y verificadas) | 05, 06, 08, 09, 42, 44, 45, 46, 47 | Nada. No las edites |
+| 🔁 **Repetir** | **01**, **04**, **39**, **41**, **43** | Ver por qué en la tabla de abajo |
+| ❌ **Faltan** | **10** y **12 a 38** y **40** | Pasos 2 y 3 |
+
+Por qué hay que repetir cada una:
+
+| # | Lo que muestra hoy | Lo que debe mostrar |
+|---|--------------------|---------------------|
+| 01 | Gradle, Java 17, `com.example`, `demo`, sin dependencias | Maven, Java 21, `cl.ipss`, `coleccion-laminas` y 6 dependencias (paso 2.1) |
+| 04 | La carpeta `java` cerrada | Los paquetes `audit`, `config`, `controller`… abiertos (paso 2.2) |
+| 39 | Swagger con la lámina 1 de ejemplo | **Postman**, request 39 de la colección (paso 3) |
+| 41 | Swagger con el álbum 1 de ejemplo | **Postman**, request 41 de la colección (paso 3) |
+| 43 | `NumerosUnicos.java` (la anotación) | `NumerosUnicosValidator.java` (la clase que valida) (paso 2.3) |
+
+En total son **34 capturas**: 5 que se repiten y 29 que faltan. Al guardar una que se repite, acepta **Reemplazar** el archivo anterior.
+
+---
+
+## 1. Preparación (una sola vez)
+
+### 1.1 Importar la colección en Postman
+
+Postman ya está instalado (versión 11.77.2).
+
+1. Abre Postman. Si te pide iniciar sesión para usar colecciones, inicia sesión o crea una cuenta gratuita.
+2. Presiona **Import**, arriba a la izquierda, o `Ctrl + O`.
+3. Elige **files** y selecciona `~/Escritorio/EXAMEN-TRANSVERSAL/docs/api/postman/coleccion-laminas.postman_collection.json`.
+4. Presiona **Import**. En *Collections*, a la izquierda, aparece **Colección de Láminas API** con 5 carpetas:
+   - 1. Álbumes
+   - 2. Láminas
+   - 3. Colección
+   - 4. Fotos de láminas
+   - 5. Auditoría
+5. No hace falta crear un entorno. La URL `http://localhost:8080` ya está en la variable `baseUrl` de la colección, así que arriba a la derecha puede decir *No environment*.
+
+### 1.2 Configurar la carpeta de archivos (para las fotos 33, 35 y 36)
+
+Las requests de fotos usan archivos de `docs/api/postman/archivos/` (`lamina.png`, `falsa.png` y `grande.png`). Para que Postman los encuentre:
+
+1. Abre **Settings**: el ícono de engranaje ⚙ arriba a la derecha → *Settings*.
+2. En **General**, busca **Working directory** y presiona **Choose**.
+3. Selecciona la carpeta `~/Escritorio/EXAMEN-TRANSVERSAL/docs/api/postman` y cierra *Settings*.
+
+Si en la pestaña *Body* de la request 33, 35 o 36 el archivo aparece en rojo o con una advertencia, haz clic en el campo del archivo (*Select Files*) y elige a mano el archivo de `docs/api/postman/archivos/`: `lamina.png` para la 33, `falsa.png` para la 35 y `grande.png` para la 36.
+
+### 1.3 Cómo sacar y guardar cada captura
+
+1. Deja en pantalla lo que quieres capturar.
+2. Presiona **`Mayús + Impr Pant`** (captura de un área) y arrastra el mouse sobre la zona útil.
+3. Aparece la ventana **Guardar captura de pantalla**:
+   - en *Nombre* escribe el nombre exacto, por ejemplo `12-album-crear-201.png`;
+   - la carpeta ya está puesta en `EXAMEN-TRANSVERSAL/docs/evidencias`. Si no, elígela.
+4. Presiona **Guardar**.
+
+Si la ventana no aparece y la imagen se va a `~/Imágenes`, muévela con este comando (cambia el nombre final):
+
+```bash
+mv "$(ls -t ~/Imágenes/*.png | head -1)" ~/Escritorio/EXAMEN-TRANSVERSAL/docs/evidencias/12-album-crear-201.png
+```
+
+En Postman, la captura debe mostrar a la vez:
+- **arriba**: el método y la URL de la request;
+- **abajo**: el código de estado (por ejemplo `201 Created`) y el *Body* de la respuesta.
+
+Captura solo esa región, no la pantalla completa. Usa el mismo tema, claro u oscuro, en todas.
+
+### 1.4 Dejar la base de datos limpia (obligatorio antes de Postman)
+
+La base local tiene datos agregados a mano (álbumes "Qatar 2022/2026"). La colección crea un álbum llamado "Qatar 2022" y cada request usa ids que guardan las anteriores, así que **debe ejecutarse sobre una base recién creada**:
+
+```bash
+cd ~/Escritorio/EXAMEN-TRANSVERSAL
+docker compose down -v          # ⚠️ borra la BD y las fotos de desarrollo (tus capturas .png NO se tocan)
+docker compose up -d --build    # MySQL + API; Flyway aplica V1..V5 y carga 2 álbumes de ejemplo
+docker compose ps               # espera a ver: coleccion-mysql "Up (healthy)" y coleccion-api "Up"
+ls -l docs/api/postman/archivos/grande.png   # debe existir (≈ 6,3 MB)
+```
+
+Si `grande.png` no existe, créalo así (no se sube a Git):
+
+```bash
+cd ~/Escritorio/EXAMEN-TRANSVERSAL/docs/api/postman
+python3 -c "import os; open('archivos/grande.png','wb').write(b'\x89PNG\r\n\x1a\n' + os.urandom(6*1024*1024))"
+```
+
+Hasta terminar la request 41, **no ejecutes** el script e2e, Newman, el *Runner* de Postman ni pruebas en Swagger, porque cambian los ids.
+
+---
+
+## 2. Capturas que no dependen de la base de datos (01, 04, 43, 10)
+
+### 2.1 `01-initializr.png`: Spring Initializr
+
+Abre https://start.spring.io. La página viene por defecto con **Gradle y Java 17**, así que hay que cambiarlos. Completa todo así:
+
+| Campo | Valor que debes marcar o escribir |
+|-------|-----------------------------------|
+| Project | **Maven** |
+| Language | **Java** |
+| Spring Boot | **4.1.1** |
+| Group | `cl.ipss` |
+| Artifact | `coleccion-laminas` |
+| Name (si aparece) | `coleccion-laminas` |
+| Description (si aparece) | `API REST para gestion de colecciones de laminas de albumes` |
+| Package name | bórralo y escribe `cl.ipss.coleccion` |
+| Packaging | **Jar** |
+| Configuration | **Properties** |
+| Java | **21** |
+
+Luego haz clic en **ADD DEPENDENCIES…** y agrega estas 6, escribiendo el nombre en el buscador y haciendo clic en cada una:
+
+1. **Spring Web**
+2. **Spring Data JPA**
+3. **MySQL Driver**
+4. **Validation**
+5. **Flyway Migration**
+6. **Lombok**
+
+**No presiones GENERATE.** Captura la página completa: el panel izquierdo con las opciones y el derecho con las 6 dependencias.
+
+### 2.2 `04-estructura-proyecto.png`: paquetes en VS Code
+
+1. En VS Code, en el panel *Explorador* de la izquierda, abre `backend` → `src` → `main` → `java` → `cl` → `ipss` → `coleccion`.
+2. Deben verse las carpetas `audit`, `config`, `controller`, `dto`, `entity`, `exception`, `mapper`, `repository`, `service`, `validation` y el archivo `ColeccionLaminasApplication.java`.
+3. Captura solo el panel del explorador con esas carpetas.
+
+### 2.3 `43-validador-numeros-unicos.png`: el validador
+
+1. En VS Code abre `backend/src/main/java/cl/ipss/coleccion/validation/`**`NumerosUnicosValidator.java`**. No abras `NumerosUnicos.java`, que es la anotación.
+2. Se debe ver `public class NumerosUnicosValidator implements ConstraintValidator<...>` y el método `isValid`.
+3. Captura el editor con ese código.
+
+### 2.4 `10-diagrama-er.png`: diagrama entidad-relación en DBeaver
+
+MySQL **no se abre en el navegador ni en Postman**. `localhost:3306` es para programas como DBeaver. El puerto es **3306** (tres-tres-cero-seis), **no 3036**. DBeaver CE ya está instalado.
+
+1. Comprueba que los contenedores estén arriba con `docker compose ps`.
+2. Abre DBeaver. En el *Navegador de base de datos*:
+   - si ya existe la conexión **localhost (MySQL)**, haz clic derecho sobre ella y elige **Editar conexión** (F4);
+   - si no existe, entra a **Base de datos → Nueva conexión → MySQL**.
+3. Pestaña **Principal (Main)**:
+
+   | Campo | Valor |
+   |-------|-------|
+   | Server Host | `localhost` |
+   | Port | `3306` |
+   | Database | `coleccion_laminas` |
+   | Autenticación | Database Native |
+   | Username | `coleccion` |
+   | Password | `coleccion` (marca *Guardar contraseña*) |
+
+4. Pestaña **Propiedades del driver (Driver properties)**: `allowPublicKeyRetrieval` = `true` (tu conexión ya lo tiene). Si aparece un error de SSL, agrega también `useSSL` = `false`.
+5. Presiona **Probar conexión**. Si pide descargar el driver, acepta **Descargar**. Debe decir *Conectado*.
+6. Presiona **Aceptar**. Luego abre la conexión → `coleccion_laminas`, haz clic derecho sobre `coleccion_laminas` y elige **Ver diagrama** (*View Diagram*).
+7. En el diagrama deben verse `album` → `lamina` (1 a N) y `album_aud`, `lamina_aud` → `revinfo`. Ordénalo con el botón *Ajustar/Arrange* de la barra del diagrama y usa el zoom para que quepa.
+8. Captura el diagrama.
+
+Si falla la conexión:
+
+| Mensaje | Causa y solución |
+|---------|------------------|
+| *Communications link failure* / *Connection refused* | Los contenedores están abajo (`docker compose up -d`) o el puerto quedó mal escrito (debe ser **3306**) |
+| *Access denied for user* | Usuario o clave incorrectos: usa `coleccion` / `coleccion` |
+| *Public Key Retrieval is not allowed* | Falta `allowPublicKeyRetrieval=true` en las propiedades del driver |
+| *Unknown database* | En *Database* escribe `coleccion_laminas`, con guion bajo |
+
+---
+
+## 3. Capturas en Postman (12 a 41): en orden y una sola vez
+
+### 3.1 Cómo ejecutar cada request
+
+1. En *Collections*, abre **Colección de Láminas API** y la carpeta que corresponda.
+2. Haz clic en la request, por ejemplo **12 Crear álbum (201)**. Se abre en una pestaña con el método, la URL y las pestañas *Params*, *Headers* y *Body*.
+3. Presiona **Send**, o `Ctrl + Enter`.
+4. En el panel de abajo aparecen:
+   - el **Status**, por ejemplo `201 Created`;
+   - el **Body** de la respuesta, en modo *Pretty*;
+   - la pestaña **Test Results**, donde el test debe aparecer como **PASS**.
+5. Revisa que el código coincida con la columna *Esperado* y recién ahí captura. Deben verse el método, la URL, el Status y el Body.
+6. **No saltes ninguna ni repitas una**: cada request guarda ids en las variables de la colección (`albumId`, `laminaPruebaId`, `lamina2Id`, `lamina3Id`, `lamina4Id`) y las siguientes los usan. Si una da un código distinto al esperado, vuelve al paso 1.4 (base limpia) y empieza de nuevo desde la 12.
+
+Las requests que llevan el encabezado `X-Usuario` ya lo traen puesto, en la pestaña *Headers*. Las de fotos (33, 35 y 36) ya traen el archivo en *Body → form-data*, campo `archivo`.
+
+### 3.2 Lista de requests y capturas
+
+| Req. | Carpeta | Archivo a guardar | Esperado | Qué debe verse |
+|------|---------|-------------------|:--------:|----------------|
+| 12 | 1. Álbumes | `12-album-crear-201.png` | 201 | Álbum "Qatar 2022" con `id` y `auditoria.creadoPor = "equipo"` |
+| 13 | 1. Álbumes | `13-album-validacion-400.png` | 400 | `errores` con los campos `nombre`, `imagen`, `fechaLanzamiento`, `totalLaminas` |
+| 14 | 1. Álbumes | `14-album-duplicado-409.png` | 409 | Mensaje de nombre duplicado |
+| 15 | 1. Álbumes | `15-album-listar-paginado.png` | 200 | `content` con los álbumes y el bloque `page` |
+| 16 | 1. Álbumes | `16-album-obtener-404.png` | 404 | ProblemDetail "Recurso no encontrado" |
+| 17 | 1. Álbumes | `17-album-actualizar-200.png` | 200 | `auditoria.modificadoPor = "bruno"` (nombre del usuario de prueba) |
+| 18 | 2. Láminas | `18-lamina-crear-201.png` | 201 | Lámina con `estado = "FALTANTE"` |
+| 19 | 2. Láminas | `19-lamina-fuera-rango-409.png` | 409 | Número que excede el total del álbum |
+| 20 | 2. Láminas | `20-lamina-listar-filtro.png` | 200 | Solo láminas de tipo `NORMAL` |
+| 21 | 2. Láminas | `21-lamina-actualizar-200.png` | 200 | Lámina actualizada a tipo `ESPECIAL` |
+| 22 | 2. Láminas | `22-lamina-eliminar-204.png` | 204 | Sin cuerpo (No Content) |
+| 23 | 3. Colección | `23-lote-201.png` | 201 | Lista de 10 láminas creadas |
+| 24 | 3. Colección | `24-lote-conflictos-409.png` | 409 | `errores` con `laminas[0].numero` y `laminas[1].numero` |
+| 25 | 3. Colección | `25-lote-repetidos-400.png` | 400 | "El lote contiene números repetidos: 11" |
+| 26 | 3. Colección | `26-registrar-200.png` | 200 | `copiasRegistradas = 6` y cantidades 1, 2 y 3 |
+| 27 | 3. Colección | `27-registrar-no-catalogado-409.png` | 409 | Número 99 no catalogado |
+| 28 | 3. Colección | `28-cantidad-patch-200.png` | 200 | `cantidad = 2` y `repetidas = 1` |
+| 29 | 3. Colección | `29-cantidad-negativa-409.png` | 409 | "La cantidad no puede quedar negativa" |
+| 30 | 3. Colección | `30-faltantes.png` | 200 | Láminas 4 a 10, `numerosNoCatalogados` 11 a 20, `totalFaltantes = 17` |
+| 31 | 3. Colección | `31-repetidas.png` | 200 | Láminas 2 y 3 con `repetidas = 1` |
+| 32 | 3. Colección | `32-resumen.png` | 200 | 10 catalogadas, 3 obtenidas, 17 faltantes, 15 % |
+| 33 | 4. Fotos | `33-foto-subir-200.png` | 200 | `fotoUrl` en la respuesta |
+| 34 | 4. Fotos | `34-foto-ver-200.png` | 200 | Postman muestra la imagen (`image/png`) |
+| 35 | 4. Fotos | `35-foto-falsa-415.png` | 415 | Archivo que no es imagen, aunque termine en `.png` |
+| 36 | 4. Fotos | `36-foto-grande-413.png` | 413 | Archivo mayor a 5 MB |
+| 37 | 4. Fotos | `37-foto-eliminar-204.png` | 204 | Sin cuerpo |
+| 38 | 5. Auditoría | `38-auditoria-header.png` | 200 | **Pestaña *Headers* de la request con `X-Usuario: ana`** + respuesta con `creadoPor = "equipo"` y `modificadoPor = "ana"` |
+| 39 | 5. Auditoría | `39-historial-lamina.png` | 200 | CREACION (equipo) → MODIFICACION (bruno) → ELIMINACION (carla) |
+| 40 | 5. Auditoría | `40-album-eliminar-204.png` | 204 | Sin cuerpo; en *Headers*, `X-Usuario: diego` |
+| 41 | 5. Auditoría | `41-historial-album.png` | 200 | CREACION → MODIFICACION → MODIFICACION → ELIMINACION (diego) |
+
+### 3.3 Si quieres comprobar la colección antes (opcional)
+
+Ejecuta toda la colección en una terminal. Hazlo **antes** del paso 1.4 o después de terminar las capturas, nunca en medio:
+
+```bash
+cd ~/Escritorio/EXAMEN-TRANSVERSAL
+npx newman run docs/api/postman/coleccion-laminas.postman_collection.json --working-dir docs/api/postman
+```
+
+Al final debe mostrar `requests 30 / 0 failed` y `assertions 31 / 0 failed`. Deja datos en la base, así que después repite el paso 1.4.
+
+---
+
+## 4. Comprobar que no falte ninguna captura
+
+```bash
+cd ~/Escritorio/EXAMEN-TRANSVERSAL/docs/evidencias
+for f in 01-initializr 02-pom-dependencias 03-application-properties 04-estructura-proyecto 05-docker-compose-ps \
+  06-arranque-api 07-carpeta-migraciones 08-flyway-schema-history 09-tablas-mysql 10-diagrama-er 11-swagger-ui \
+  12-album-crear-201 13-album-validacion-400 14-album-duplicado-409 15-album-listar-paginado 16-album-obtener-404 \
+  17-album-actualizar-200 18-lamina-crear-201 19-lamina-fuera-rango-409 20-lamina-listar-filtro 21-lamina-actualizar-200 \
+  22-lamina-eliminar-204 23-lote-201 24-lote-conflictos-409 25-lote-repetidos-400 26-registrar-200 \
+  27-registrar-no-catalogado-409 28-cantidad-patch-200 29-cantidad-negativa-409 30-faltantes 31-repetidas 32-resumen \
+  33-foto-subir-200 34-foto-ver-200 35-foto-falsa-415 36-foto-grande-413 37-foto-eliminar-204 38-auditoria-header \
+  39-historial-lamina 40-album-eliminar-204 41-historial-album 42-revinfo-lamina-aud 43-validador-numeros-unicos \
+  44-script-e2e 45-mvnw-verify 46-newman 47-resumen-suites; do [ -f "$f.png" ] || echo "FALTA $f.png"; done; echo "revision terminada"
+```
+
+Si solo imprime `revision terminada`, están las 47. El comando no detecta una captura equivocada: revisa las 5 que se repiten (01, 04, 39, 41 y 43).
+
+---
+
+## 5. Armar el informe con las capturas
+
+### Opción A (recomendada): regenerarlo automáticamente
+
+El script arma el PDF completo con todas tus capturas en su lugar, el formato exigido y el índice con números de página. Las cifras las toma de `docs/evidencias/*.txt`.
+
+```bash
+sudo apt install python3-docx      # una sola vez (Pillow y LibreOffice ya están instalados)
+cd ~/Escritorio/EXAMEN-TRANSVERSAL
+python3 docs/informe/generar_informe.py
+```
+
+Al terminar muestra el número de páginas (debe estar entre 5 y 15) y, si falta alguna captura, la lista `CAPTURAS PENDIENTES`. El PDF queda en `docs/informe/EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.pdf`.
+
+Para que salga en **Arial** real y no en Liberation Sans, instala antes la fuente con `sudo apt install ttf-mscorefonts-installer` y acepta la licencia.
+
+### Opción B: editarlo a mano (Claude web, Writer, Docs)
+
+Mantén esta correspondencia entre figuras y capturas, porque la Tabla 2 del informe cita las figuras por número:
+
+- **Cuerpo:** Fig. 1 → 01 · Fig. 2 → 02 · Fig. 3 → 03 · Fig. 4 → 05 · Fig. 5 → 10 · Fig. 6 → 11 · Fig. 7 → 08 · Fig. 8 → 38 · Fig. 9 → 41 · Fig. 10 → 42 · Fig. 11 → 13 · Fig. 12 → 23 · Fig. 13 → 24 · Fig. 14 → 26 · Fig. 15 → 30 · Fig. 16 → 31 · Fig. 17 → 32 · Fig. 18 → 33 · Fig. 19 → 35 · Fig. 20 → 47
+- **Anexo A.1 (colección Postman):** Fig. 21 a 39 → 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 25, 27, 28, 29, 34, 36, 37, 39, 40 (en ese orden)
+- **Anexo A.2:** Fig. 40 → 04 · Fig. 41 → 07 · Fig. 42 → 43 · Fig. 43 → 09 · Fig. 44 → 46 · Fig. 45 → 06 · Fig. 46 → 44 · Fig. 47 → 45
+
+No cambies las cifras del texto: todas vienen de comandos ejecutados (11 tests, 110 comprobaciones e2e, 30 requests y 31 assertions de Newman, 21 operaciones, 5 migraciones). Donde el texto hable de la colección de pruebas, debe decir **Postman**.
+
+---
+
+## 6. Referencia: lista completa de capturas
+
+★ = va en el cuerpo del informe. El resto va al **Anexo A**, de modo que cada prueba 12–41 tiene su captura en el PDF. Todas quedan también en `docs/evidencias/` (repo y ZIP).
+
+### 6.1 Configuración del proyecto (indicador 1 · 20 pts)
 
 | # | Archivo | Qué debe verse | Cómo obtenerla |
 |---|---------|----------------|----------------|
-| ★01 | `01-initializr.png` | start.spring.io con Maven, Java 21, Boot 4.1.1, group `cl.ipss`, artifact `coleccion-laminas` y las dependencias Web, JPA, MySQL, Validation, Flyway y Lombok | Abre https://start.spring.io, completa los campos y captura **sin** generar |
-| ★02 | `02-pom-dependencias.png` | Bloque `<dependencies>` del `pom.xml` | IDE → `backend/pom.xml` |
-| ★03 | `03-application-properties.png` | Datasource con variables de entorno, `ddl-auto=validate`, Flyway, Envers | IDE → `backend/src/main/resources/application.properties` |
-| 04 | `04-estructura-proyecto.png` | Árbol de paquetes (`audit`, `config`, `controller`, `dto`, `entity`, `exception`, `mapper`, `repository`, `service`, `validation`) | IDE → panel del proyecto |
-| ★05 | `05-docker-compose-ps.png` | `coleccion-mysql (healthy)` y `coleccion-api Up` | `docker compose ps` |
-| 06 | `06-arranque-api.png` | Flyway aplicando V1..V5 + `Started ColeccionLaminasApplication` | `docker compose logs api \| grep -E "Migrating\|Successfully\|Started"` |
+| ★01 | `01-initializr.png` | Maven, Java 21, Boot 4.1.1, `cl.ipss`, `coleccion-laminas`, `cl.ipss.coleccion`, Jar, Properties y las 6 dependencias | Paso 2.1 |
+| ★02 | `02-pom-dependencias.png` | Bloque `<dependencies>` del `pom.xml` | VS Code → `backend/pom.xml` |
+| ★03 | `03-application-properties.png` | Datasource con variables de entorno, `ddl-auto=validate`, Flyway, Envers | VS Code → `application.properties` |
+| 04 | `04-estructura-proyecto.png` | Paquetes `audit` … `validation` | Paso 2.2 |
+| ★05 | `05-docker-compose-ps.png` | `coleccion-mysql (healthy)` y `coleccion-api Up` | Generada por comando |
+| 06 | `06-arranque-api.png` | Flyway aplicando V1..V5 + `Started ColeccionLaminasApplication` | Generada por comando |
 
-### 3.2 Base de datos y migraciones (indicadores 2 y 4)
+### 6.2 Base de datos y migraciones (indicadores 2 y 4)
 
 | # | Archivo | Qué debe verse | Cómo obtenerla |
 |---|---------|----------------|----------------|
-| 07 | `07-carpeta-migraciones.png` | `db/migration` con V1…V5 | IDE |
-| ★08 | `08-flyway-schema-history.png` | Las 5 migraciones con `success = 1` | `docker compose exec mysql mysql -ucoleccion -pcoleccion coleccion_laminas -e "SELECT installed_rank, version, description, installed_on, success FROM flyway_schema_history;"` |
-| 09 | `09-tablas-mysql.png` | `album`, `lamina`, `album_aud`, `lamina_aud`, `revinfo`, `flyway_schema_history` | Mismo comando con `SHOW TABLES;` |
-| ★10 | `10-diagrama-er.png` | album 1—N lamina; tablas `_aud` → `revinfo` | MySQL Workbench o DBeaver → conectar a `localhost:3306` (usuario `coleccion`, clave `coleccion`) → *Reverse Engineer* / *ER Diagram* |
+| 07 | `07-carpeta-migraciones.png` | `db/migration` con V1…V5 | VS Code |
+| ★08 | `08-flyway-schema-history.png` | Las 5 migraciones con `success = 1` | Generada por comando |
+| 09 | `09-tablas-mysql.png` | `album`, `lamina`, `album_aud`, `lamina_aud`, `revinfo`, `flyway_schema_history` | Generada por comando |
+| ★10 | `10-diagrama-er.png` | album 1—N lamina; tablas `_aud` → `revinfo` | Paso 2.4 (DBeaver, puerto 3306) |
 
-### 3.3 Documentación de la API
+### 6.3 Documentación de la API
 
 | # | Archivo | Qué debe verse | Cómo obtenerla |
 |---|---------|----------------|----------------|
 | ★11 | `11-swagger-ui.png` | Swagger UI con los 5 grupos (1. Álbumes … 5. Auditoría) | Navegador → http://localhost:8080/swagger-ui.html |
 
-### 3.4 Pruebas de endpoints (colección Bruno)
+### 6.4 Pruebas de endpoints (colección Postman, 12 a 41)
 
-En cada captura deben verse **método, URL, status y body**.
+La lista está en el paso 3.2. Van en el cuerpo (★): 13, 23, 24, 26, 30, 31, 32, 33, 35, 38 y 41. Las demás van al Anexo A.
 
-**1. Álbumes**
-| # | Archivo | Request Bruno | Resultado esperado |
-|---|---------|---------------|--------------------|
-| ★12 | `12-album-crear-201.png` | 12 Crear álbum | 201, header `Location`, `auditoria.creadoPor = equipo` |
-| ★13 | `13-album-validacion-400.png` | 13 Validación de datos | 400 con `errores` por campo |
-| 14 | `14-album-duplicado-409.png` | 14 Nombre duplicado | 409 |
-| 15 | `15-album-listar-paginado.png` | 15 Listar álbumes paginado | 200 con `content` y `page` (incluye los álbumes de ejemplo) |
-| 16 | `16-album-obtener-404.png` | 16 Álbum inexistente | 404 ProblemDetail |
-| 17 | `17-album-actualizar-200.png` | 17 Actualizar álbum | 200, `modificadoPor = bruno` |
+### 6.5 Auditoría y pruebas automáticas (generadas por comando)
 
-**2. Láminas**
-| # | Archivo | Request Bruno | Resultado esperado |
-|---|---------|---------------|--------------------|
-| 18 | `18-lamina-crear-201.png` | 18 Crear lámina | 201, estado `FALTANTE` |
-| 19 | `19-lamina-fuera-rango-409.png` | 19 Número fuera de rango | 409 |
-| 20 | `20-lamina-listar-filtro.png` | 20 Listar láminas por tipo | 200 solo `NORMAL` |
-| 21 | `21-lamina-actualizar-200.png` | 21 Actualizar lámina | 200 |
-| 22 | `22-lamina-eliminar-204.png` | 22 Eliminar lámina | 204 |
+| # | Archivo | Qué muestra |
+|---|---------|-------------|
+| ★42 | `42-revinfo-lamina-aud.png` | Revisión, fecha, usuario y `revtype` de cada cambio (la revisión 37, de `diego`, elimina las láminas del álbum) |
+| 43 | `43-validador-numeros-unicos.png` | Código de `NumerosUnicosValidator` (captura tuya, paso 2.3) |
+| 44 | `44-script-e2e.png` | Final de `bash pruebas/e2e.sh`: `RESULTADO: 110 OK, 0 FAIL` |
+| 45 | `45-mvnw-verify.png` | `Tests run: 11, Failures: 0` y `BUILD SUCCESS` |
+| 46 | `46-newman.png` | Newman (colección Postman): 30 requests y 31 assertions, 0 fallos |
+| ★47 | `47-resumen-suites.png` | Totales de las tres suites en una sola imagen |
 
-**3. Funcionalidades especiales (indicador 3 · 25 pts)**
-| # | Archivo | Request Bruno | Resultado esperado |
-|---|---------|---------------|--------------------|
-| ★23 | `23-lote-201.png` | 23 Carga en lote | 201 con 10 láminas |
-| ★24 | `24-lote-conflictos-409.png` | 24 Lote con conflictos | 409 con `errores` por posición |
-| 25 | `25-lote-repetidos-400.png` | 25 Lote con números repetidos | 400 (`@NumerosUnicos`) |
-| ★26 | `26-registrar-200.png` | 26 Registrar obtenidas | 200, cantidades 1 / 2 / 3 |
-| 27 | `27-registrar-no-catalogado-409.png` | 27 Registrar número no catalogado | 409 |
-| 28 | `28-cantidad-patch-200.png` | 28 Restar una copia | 200, cantidad 2 |
-| 29 | `29-cantidad-negativa-409.png` | 29 Cantidad negativa | 409 |
-| ★30 | `30-faltantes.png` | 30 Láminas faltantes | 200: láminas 4–10 y no catalogadas 11–20 (total 17) |
-| ★31 | `31-repetidas.png` | 31 Láminas repetidas | 200: láminas 2 y 3 con 1 repetida cada una |
-| ★32 | `32-resumen.png` | 32 Resumen del álbum | 200: 3 obtenidas, 17 faltantes, 15 % |
-
-**4. Fotos**
-| # | Archivo | Request Bruno | Resultado esperado |
-|---|---------|---------------|--------------------|
-| ★33 | `33-foto-subir-200.png` | 33 Subir foto (pestaña *Body*: Multipart, campo `archivo`) | 200 con `fotoUrl` |
-| 34 | `34-foto-ver-200.png` | 34 Ver foto | 200 `image/png` (Bruno muestra la imagen) |
-| ★35 | `35-foto-falsa-415.png` | 35 Archivo que no es imagen | 415 |
-| 36 | `36-foto-grande-413.png` | 36 Archivo mayor a 5 MB | 413 |
-| 37 | `37-foto-eliminar-204.png` | 37 Quitar foto | 204 |
-
-### 3.5 Auditoría y validaciones (indicador 4 · 20 pts)
-
-| # | Archivo | Qué debe verse | Cómo obtenerla |
-|---|---------|----------------|----------------|
-| ★38 | `38-auditoria-header.png` | Pestaña *Headers* con `X-Usuario: ana` + respuesta con `creadoPor = equipo` y `modificadoPor = ana` | Bruno 38 |
-| 39 | `39-historial-lamina.png` | `CREACION` (equipo) → `MODIFICACION` (bruno) → `ELIMINACION` (carla) | Bruno 39 |
-| 40 | `40-album-eliminar-204.png` | 204 con `X-Usuario: diego` | Bruno 40 |
-| ★41 | `41-historial-album.png` | CREACION → MODIFICACION → MODIFICACION → ELIMINACION (diego) | Bruno 41 |
-| ★42 | `42-revinfo-lamina-aud.png` | Revisión, fecha, usuario y `revtype` de cada cambio | `docker compose exec mysql mysql -ucoleccion -pcoleccion coleccion_laminas -e "SELECT r.id, FROM_UNIXTIME(r.revtstmp/1000) fecha, r.usuario, a.id lamina, a.revtype, a.numero, a.cantidad FROM lamina_aud a JOIN revinfo r ON r.id=a.rev ORDER BY r.id DESC LIMIT 15;"` |
-| 43 | `43-validador-numeros-unicos.png` | Código de `NumerosUnicosValidator` | IDE → `validation/NumerosUnicosValidator.java` |
-
-### 3.6 Resumen de pruebas automatizadas
-
-| # | Archivo | Qué debe verse | Cómo obtenerla |
-|---|---------|----------------|----------------|
-| ★44 | `44-script-e2e.png` | Final de la salida: `RESULTADO: 108 OK, 0 FAIL` | `bash pruebas/e2e.sh` (con la API arriba) |
-| ★45 | `45-mvnw-verify.png` | `Tests run: 11, Failures: 0` y `BUILD SUCCESS` | `cd backend && ./mvnw verify` |
-| 46 | `46-bruno-cli.png` | Resumen de la colección Bruno: todas las requests y asserts en verde | `cd docs/api/bruno && npx @usebruno/cli run -r --env local` (en una BD limpia) |
+Cada captura generada por comando tiene al lado su `.txt` con la salida literal. Esa es la fuente de las cifras del informe.
 
 ---
 
-## 4. Redacción del informe
+## 7. Referencia: formato y contenido del informe
 
-### 4.1 Formato (obligatorio)
-
-Usa Google Docs, LibreOffice Writer o Word y **exporta a PDF**; el profesor pidió no enviar Word.
+### 7.1 Formato (obligatorio)
 
 | Ajuste | Valor |
 |--------|-------|
-| Fuente | Arial 12 en todo el texto (títulos Arial 14 negrita) |
+| Formato de entrega | **PDF** (el profesor pidió no enviar Word) |
+| Fuente | Arial 12 en el cuerpo (títulos Arial 14 y 12 negrita; tablas y pies de figura a 10) |
 | Interlineado | 1,15 |
 | Alineación | Justificada |
 | Márgenes | 2,5 cm |
-| Números de página | Pie de página, desde la página 2 |
-| Extensión | 5 a 10 páginas, **incluida la portada** |
-| Imágenes | Tabla de 2 columnas sin bordes, cada imagen ≈ 8 cm de ancho, con pie "Figura N: …" |
-| Índice | Automático, a partir de los estilos Título 1 y Título 2 |
+| Números de página | Pie de página; la portada sin número |
+| Extensión | 5 a 15 páginas, **incluidos la portada y el Anexo A** (el enunciado dice 5 a 10; el grupo recibió el 13-09 la aclaración de que se acepta anexo hasta 15) |
+| Portada | Logo IPSS, título, asignatura, profesor Boris Marcelo Belmar Muñoz, integrantes Valeria Gómez y Otton Lucena, Grupo 2, fecha |
 
-### 4.2 Estructura y contenido página por página
+### 7.2 Estructura
 
-| Pág. | Sección | Qué escribir | Figuras |
-|:---:|---------|--------------|---------|
-| 1 | **Portada** | Logo IPSS (recórtalo del PDF del examen), "Sistema de Gestión de Colección de Láminas – API REST", asignatura *Desarrollo de Software Web II*, profesor *Boris Marcelo Belmar Muñoz*, integrantes, grupo, fecha | — |
-| 2 | **Índice** | Automático | — |
-| 3 | **1. Introducción** | Problema (coleccionistas que necesitan saber qué láminas les faltan y cuáles tienen repetidas), objetivo, alcance (API REST sin frontend) y **justificación de la tecnología** (§4.3) | — |
-| 4 | **2. Desarrollo · 2.1 Configuración** | Initializr, para qué sirve cada dependencia, properties con variables de entorno, Docker Compose | 01, 02, 03, 05 |
-| 5 | **2.2 Arquitectura y modelo de datos** | Capas controller → service → repository, DTOs (no se exponen entidades), Album 1:N Lamina, regla `cantidad` → faltante / obtenida / repetida | 10 (+04) |
-| 6 | **2.3 API y funcionalidades especiales** | Tabla de endpoints (copiarla del README), lote todo o nada, registrar obtenidas, faltantes (incluye no catalogadas), repetidas, resumen en una consulta, fotos multipart | 11 |
-| 7 | **2.4 Validaciones y auditoría** | Bean Validation, reglas de negocio (409), `@NumerosUnicos`, errores RFC 9457, validación de fotos por contenido; auditoría en 3 capas: **migraciones Flyway** (lo que pidió el profesor), JPA Auditing con `X-Usuario`, Envers con historial | 08, 38, 41, 42 |
-| 8–9 | **3. Pruebas** | Tabla resumen (§4.4) + grilla de capturas ★ + script e2e + `mvnw verify` | 12, 13, 23, 24, 26, 30–33, 35, 44, 45 |
-| 10 | **4. Conclusión** y **5. Bibliografía** | Qué se logró por indicador, dificultades resueltas (enums de MySQL, auditoría de borrados en cascada, precisión de fechas) y mejoras futuras (autenticación, frontend) | — |
-
-### 4.3 Justificación de la tecnología (el profesor la pidió explícitamente)
-
-- **Spring Boot 4.1 + Java 21:** lo pide el enunciado; es estándar en la industria, trae auto-configuración y un ecosistema (Data JPA, Validation) que cubre todos los requisitos; Java 21 es LTS.
-- **MySQL 8.4:** obligatorio según el enunciado y el profesor; versión LTS; relacional, adecuado para la relación álbum-lámina y con integridad (FK, UNIQUE, CHECK).
-- **Flyway:** el profesor indicó que la auditoría del esquema se hace con migraciones; deja un historial versionado y reproducible (`flyway_schema_history`).
-- **Hibernate Envers + JPA Auditing:** registran quién, cuándo y qué cambió en cada registro, incluidos los eliminados.
-- **Docker Compose:** mismo entorno en cualquier computador; MySQL sin instalación local.
-- **springdoc/Swagger + Bruno:** documentación navegable y colección versionable en Git (Bruno fue sugerido en clase).
-
-### 4.4 Tabla de pruebas (modelo)
-
-| N° | Endpoint | Caso | Esperado | Obtenido | Fig. |
-|:--:|----------|------|:--------:|:--------:|:----:|
-| 1 | POST /api/albumes | Álbum válido | 201 | 201 ✅ | 12 |
-| 2 | POST /api/albumes | Campos inválidos | 400 | 400 ✅ | 13 |
-| … | … | … | … | … | … |
-
-Una fila por cada captura 12–41. Agrega una fila final: "Script e2e: 108 comprobaciones, 0 fallos (Fig. 44)".
-
-### 4.5 Bibliografía (APA 7, ejemplos)
-
-- Broadcom. (2026). *Spring Boot reference documentation* (Versión 4.1). https://docs.spring.io/spring-boot/
-- Broadcom. (2026). *Spring Data JPA reference documentation*. https://docs.spring.io/spring-data/jpa/reference/
-- Red Hat. (2026). *Hibernate ORM user guide: Envers* (Versión 7.4). https://docs.hibernate.org/orm/
-- Redgate. (2026). *Flyway documentation*. https://documentation.red-gate.com/flyway
-- Oracle. (2026). *MySQL 8.4 reference manual*. https://dev.mysql.com/doc/refman/8.4/en/
-- springdoc. (2026). *springdoc-openapi* (Versión 3.1). https://springdoc.org/
-- Docker Inc. (2026). *Docker Compose documentation*. https://docs.docker.com/compose/
-- Bruno. (2026). *Bruno documentation*. https://docs.usebruno.com/
-- Nottingham, M., Wilde, E., & Dalal, S. (2023). *RFC 9457: Problem details for HTTP APIs*. IETF. https://www.rfc-editor.org/rfc/rfc9457
+| Sección | Contenido | Figuras |
+|---------|-----------|---------|
+| Portada e Índice | — | — |
+| 1. Introducción | Problema, objetivo, alcance (API REST sin frontend) y **justificación de la tecnología** | — |
+| 2.1 Configuración | Initializr, dependencias, properties con variables de entorno, Docker Compose | 01, 02, 03, 05 |
+| 2.2 Arquitectura y modelo | Capas, DTOs, interfaz de usuario = Swagger UI + Postman, Album 1:N Lamina, regla de `cantidad` | 10, 11 |
+| 2.3 API y funcionalidades especiales | Tabla de endpoints, lote todo o nada, registrar, faltantes, repetidas, resumen, fotos multipart | — |
+| 2.4 Validaciones y auditoría | Bean Validation, `@NumerosUnicos`, reglas 409, RFC 9457; Flyway, JPA Auditing, Envers | 08, 38, 41, 42 |
+| 3. Pruebas | Tres niveles, Tabla 2 (una fila por request 12–41) y capturas ★ | 13, 23, 24, 26, 30–33, 35, 47 |
+| 4. Conclusión y 5. Bibliografía | Logros, dificultades resueltas, mejoras; APA 7 | — |
+| Anexo A | Una captura por cada prueba restante + proyecto, BD y suites | 04, 06, 07, 09, 12, 14–22, 25, 27–29, 34, 36, 37, 39, 40, 43–46 |
 
 ---
 
-## 5. Entrega
+## 8. Entrega
 
-1. **GitHub:** crea el repositorio, sube el proyecto y verifica que no suban `target/`, `uploads/`, `.env` ni `grande.png`. Si el repo es privado, invita al profesor.
-2. Crea `ENLACE_GITHUB.txt` con la URL del repositorio.
-3. Exporta el informe a PDF: `EXT_GRUPO_APELLIDO_NOMBRE.pdf`.
-4. Arma el ZIP `EXT_GRUPO_APELLIDO_NOMBRE.zip` con el proyecto (sin `target/`), el PDF, `ENLACE_GITHUB.txt` y `docs/evidencias/`.
-5. Revisa antes de subir:
-   - [ ] El PDF abre y tiene entre 5 y 10 páginas
+1. `ENLACE_GITHUB.txt` ya está creado en la raíz, con la URL del repositorio público.
+2. Informe: `docs/informe/EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.pdf`.
+3. ZIP `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.zip` con el proyecto (sin `target/`, `uploads/`, `.env`, `grande.png` ni material del curso), el PDF, `ENLACE_GITHUB.txt` y `docs/evidencias/`.
+4. Revisa antes de subir:
+   - [ ] Están las 47 capturas (sección 4) y las 5 repetidas muestran lo correcto
+   - [ ] El PDF abre y tiene entre 5 y 15 páginas
    - [ ] Arial 12, interlineado 1,15, justificado, páginas numeradas
    - [ ] Portada con logo, profesor e integrantes
-   - [ ] Justificación de la tecnología
-   - [ ] Evidencias de migraciones (08) y de auditoría (38, 41, 42)
-   - [ ] Tabla de pruebas completa
    - [ ] El ZIP descomprime y `docker compose up -d --build` funciona en limpio
-6. Súbelo a la plataforma **antes del 17-09-2026**.
-
-## 6. Pendientes para consultar al profesor
-
-- ¿Se puede incluir un anexo de capturas fuera del límite de 10 páginas? Si la respuesta es sí, las capturas sin ★ van al anexo.
-- ¿Qué apellido y nombre van en el archivo si el trabajo es grupal?
+   - [ ] Commit y push hechos (`git status` limpio)
+5. Súbelo a la plataforma **antes del 17-09-2026**.

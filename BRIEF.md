@@ -34,7 +34,7 @@ El profesor pidió seguir estas funcionalidades **al pie de la letra**.
 | 2 | Modelo de datos y API REST (IL3) | **25** | Entidades y API "perfectamente diseñadas"; CRUD "completo y eficiente" | `Album` 1:N `Lamina`, DTOs, códigos HTTP correctos, rutas REST coherentes, paginación |
 | 3 | Funcionalidades especiales de láminas (IL4) | **25** | "Operaciones eficientes y precisas"; separación entre lógica de negocio y acceso a datos | Carga en lote transaccional, faltantes y repetidas resueltas con consultas en el repositorio, lógica en los Services, controllers delgados |
 | 4 | **Validaciones y auditoría** (IL2) | **20** | "Validaciones avanzadas y auditorías detalladas para rastrear cambios" | Bean Validation, validaciones de negocio, errores uniformes, **migraciones Flyway** (lo que pidió el profesor), JPA Auditing y Hibernate Envers |
-| 5 | Calidad del informe y documentación del código | **10** | Informe bien estructurado; explicación clara de todo el código | Informe PDF con formato exacto, justificación de la tecnología, Javadoc, Swagger y colección Bruno |
+| 5 | Calidad del informe y documentación del código | **10** | Informe bien estructurado; explicación clara de todo el código | Informe PDF con formato exacto, justificación de la tecnología, Javadoc, Swagger y colección Postman |
 
 ### 2.2 Aclaraciones del profesor en la última clase
 
@@ -46,14 +46,14 @@ El profesor pidió seguir estas funcionalidades **al pie de la letra**.
 | **BD no relacional** | La rúbrica la menciona | "Olvídense de lo no relacional… es relacional sí o sí" | **Sin NoSQL.** Solo MySQL. |
 | **Formato del informe** | Word o PDF | Acepta PDF, Markdown o video; **pidió no mandar Word** | **PDF.** |
 | **Entrega del código** | ZIP | "Mándenlo en un GitHub y el link en un documento de texto" | GitHub + `.txt` con el link, **dentro del ZIP**, para cumplir ambas instrucciones. |
-| **Documentación de la API** | "Documentación simple" | Vale colección de Bruno, PDF, Markdown u OpenAPI | **Swagger/OpenAPI + colección Bruno**. |
+| **Documentación de la API** | "Documentación simple" | Vale colección de Bruno, PDF, Markdown u OpenAPI (Bruno solo como ejemplo) | **Swagger/OpenAPI + colección Postman** (el 13-09 el grupo cambió Bruno por Postman). |
 | **Fotos** | "Carga opcional de una foto" | `multipart`; guardar imágenes en Base64 en la BD es mala práctica | Archivo en disco (volumen Docker) y solo la ruta en la BD. |
 | **Rúbrica** | — | "Siempre la rúbrica al pie de la letra" | La rúbrica manda. Lo único flexible es la tecnología; MySQL es fijo. |
 
 ### 2.3 Riesgos
 
 - **Sin validaciones ni auditoría se pierden 20 pts** (nota máxima ≈ 5,5), y **sin migraciones el indicador 4 queda cojo** aunque haya Envers.
-- **Informe con tope de 10 páginas** y un screenshot por prueba: hay que agrupar capturas y usar tablas.
+- **Informe con tope de 15 páginas, anexo incluido** (aclaración recibida por el grupo el 13-09; el enunciado dice 5 a 10) y un screenshot por prueba: las capturas representativas van en el cuerpo y el resto en el Anexo A, en grilla.
 - **"Eficiente"** aparece en los indicadores 2 y 3: faltantes y repetidas se resuelven con consultas a la BD, nunca filtrando listas en memoria; la carga en lote va con `@Transactional`.
 - **Plazo corto (~1 semana):** el alcance mínimo va primero y los extras (Envers, tests) después.
 
@@ -70,7 +70,7 @@ El profesor pidió seguir estas funcionalidades **al pie de la letra**.
 ### 3.1 Arquitectura en capas
 
 ```
-Cliente (Bruno / Swagger UI)
+Cliente (Postman / Swagger UI)
       │ JSON · multipart
       ▼
 controller ──► service (interfaz + impl) ──► repository (JpaRepository) ──► MySQL 8.4
@@ -106,7 +106,7 @@ EXAMEN-TRANSVERSAL/                  ← repo GitHub
 │           ├── application.properties
 │           └── db/migration/  (V1__..., V2__..., ...)
 └── docs/
-    ├── api/bruno/                   ← colección Bruno
+    ├── api/postman/                 ← colección Postman (+ Newman)
     ├── evidencias/                  ← screenshots numerados
     └── informe/                     ← fuente y PDF del informe
 ```
@@ -260,7 +260,7 @@ springdoc.swagger-ui.path=/swagger-ui.html
 
 `compose.yaml` en la raíz:
 - **mysql:** imagen `mysql:8.4` (LTS), base `coleccion_laminas`, usuario y clave desde `.env`, volumen `mysql-data`, `healthcheck` con `mysqladmin ping`, puerto `3306`.
-- **api:** build desde `backend/Dockerfile` (multi-stage: `maven:3.9-eclipse-temurin-21` para compilar y `eclipse-temurin:21-jre` para ejecutar), `depends_on: mysql (service_healthy)`, `DB_URL=jdbc:mysql://mysql:3306/...`, volumen `uploads` montado en `/app/uploads`, puerto `8080`.
+- **api:** build desde `backend/Dockerfile` (multi-stage: `eclipse-temurin:21-jdk` con el Maven Wrapper para compilar y `eclipse-temurin:21-jre` con usuario sin privilegios para ejecutar), `depends_on: mysql (service_healthy)`, `DB_URL=jdbc:mysql://mysql:3306/...`, volumen `uploads` montado en `/app/uploads`, puerto `8080`.
 
 Comandos:
 - Todo el sistema: `docker compose up --build`
@@ -269,7 +269,7 @@ Comandos:
 ### 3.9 Documentación y pruebas
 
 - **Swagger UI** en `/swagger-ui.html`, con `@Tag`, `@Operation`, `@ApiResponse` y `@Schema` en endpoints y DTOs.
-- **Colección Bruno** en `docs/api/bruno/`, con un request por endpoint y casos de error. El profesor la sugirió.
+- **Colección Postman** en `docs/api/postman/`, con las 30 requests numeradas 12–41, variables encadenadas y tests; se ejecuta también con Newman. El profesor citó Bruno como ejemplo; el grupo eligió Postman (13-09).
 - **README.md:** requisitos, cómo levantar el proyecto, variables, tabla de endpoints y ejemplos.
 - **Pruebas manuales:** caso feliz + al menos un caso de error por endpoint (400, 404, 409, 413/415 en fotos) → screenshots en `docs/evidencias/NN-endpoint-caso.png`.
 - **Tests automáticos (extra):** JUnit 5 + Mockito sobre `LaminaService` (faltantes, repetidas, lote, registrar) y un `@WebMvcTest` del controller.
@@ -281,11 +281,12 @@ Comandos:
 | Requisito | Valor |
 |-----------|-------|
 | Formato | **PDF** (el profesor pidió evitar Word) |
-| Extensión | **5 a 10 páginas** |
+| Extensión | **5 a 15 páginas, incluido el Anexo A** (aclaración recibida por el grupo el 13-09; el enunciado dice 5 a 10) |
 | Letra | Arial 12 · interlineado 1,15 · justificado · páginas numeradas |
-| Portada | Título, asignatura, **logo IPSS**, profesor (Boris Belmar Muñoz) y alumnos |
-| Estructura | Portada · Índice · Introducción · Desarrollo · Conclusión · Bibliografía |
-| Nombre | `EXT_GRUPO_APELLIDO_NOMBRE.pdf` |
+| Portada | Título, asignatura, **logo IPSS**, profesor (Boris Marcelo Belmar Muñoz) y alumnos (Grupo 2: Valeria Gómez y Otton Lucena) |
+| Estructura | Portada · Índice · Introducción · Desarrollo · Pruebas · Conclusión · Bibliografía · Anexo A (capturas) |
+| Nombre | `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON.pdf` (confirmado por el grupo) |
+| Generación | `python3 docs/informe/generar_informe.py`: todas las cifras salen de `docs/evidencias/` |
 
 **Distribución sugerida:**
 1. Portada
@@ -297,6 +298,7 @@ Comandos:
 7. Desarrollo: tabla de endpoints
 8–9. Pruebas: tabla resumen + screenshots agrupados
 10. Conclusión + bibliografía APA (docs de Spring Boot, Spring Data JPA, Flyway, Hibernate Envers, springdoc, MySQL, Docker)
+11–15. Anexo A: la captura de cada prueba de la colección que no está en el cuerpo, más proyecto, BD y salidas completas de las suites
 
 ---
 
@@ -305,7 +307,7 @@ Comandos:
 **Código**
 - [x] Proyecto Maven generado con Initializr; `./mvnw verify` pasa (Testcontainers + MySQL 8.4)
 - [x] `compose.yaml` levanta MySQL 8.4 y la API sin errores
-- [x] Flyway crea todo el esquema (V1–V4); `ddl-auto=validate` no reporta diferencias
+- [x] Flyway crea todo el esquema (V1–V5); `ddl-auto=validate` no reporta diferencias
 - [x] Entidades `Album` y `Lamina` con los campos pedidos (nombre, imagen, fecha de lanzamiento, tipo de láminas…)
 - [x] CRUD completo de álbumes
 - [x] CRUD completo de láminas
@@ -323,22 +325,22 @@ Comandos:
 - [x] Logging en los Services
 - [x] Swagger funcionando (21 operaciones documentadas, header `X-Usuario` en escrituras)
 - [x] Javadoc en las clases públicas
-- [x] README + colección Bruno (30 requests numeradas como las capturas) + datos semilla (V5)
-- [x] Tests automáticos: 11 (unitarios, MockMvc, integración) + e2e (108) + Bruno CLI (31)
+- [x] README + colección Postman (30 requests numeradas como las capturas; migrada desde Bruno el 13-09) + datos semilla (V5)
+- [x] Tests automáticos: 11 (unitarios, MockMvc, integración) + e2e (110) + Newman (30 requests, 31 assertions); verificado desde cero el 13-09
 
-**Informe**
-- [ ] Formato exacto (Arial 12, 1,15, justificado, numerado, 5–10 págs.)
-- [ ] Portada completa con logo IPSS
-- [ ] Justificación de la tecnología
-- [ ] Todas las secciones
-- [ ] Screenshot de cada prueba
-- [ ] Evidencia de migraciones (`flyway_schema_history`) y de auditoría
+**Informe** (verificado sobre el PDF generado el 13-09)
+- [ ] Formato exacto (Arial 12, 1,15, justificado, numerado, 5–15 págs.): interlineado, justificado, numeración y extensión verificados; **falta Arial real** (el PDF sale con Liberation Sans hasta instalar la fuente)
+- [x] Portada completa con logo IPSS, profesor, integrantes y grupo
+- [x] Justificación de la tecnología
+- [x] Todas las secciones (más el Anexo A)
+- [ ] Screenshot de cada prueba: el informe ya reserva una figura por prueba, pero **faltan las capturas de Postman, IDE, Initializr y diagrama ER**
+- [x] Evidencia de migraciones (`flyway_schema_history`) y de auditoría (`revinfo` + `lamina_aud`)
 
 **Entrega**
-- [ ] Repositorio en GitHub (público o con acceso para el profesor)
+- [x] Repositorio en GitHub público (verificado con `git clone` sin credenciales el 13-09); **falta subir la Fase 6**
 - [ ] `ENLACE_GITHUB.txt` con el link
-- [ ] ZIP = proyecto (sin `target/`, `uploads/` ni `.env`) + informe PDF + `.txt` con el link
-- [ ] Nombre: `EXT_GRUPO_APELLIDO_NOMBRE`
+- [ ] ZIP = proyecto (sin `target/`, `uploads/`, `.env` ni material del curso) + informe PDF + `.txt` con el link + `docs/evidencias/`
+- [ ] Nombre: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON` (confirmado; falta armar el ZIP)
 - [ ] Subido antes del **17-09-2026**
 
 ---
@@ -358,9 +360,10 @@ Comandos:
 |   | *Fase 4 completada el 10-09: migraciones V3 (columnas auditoría) y V4 (Envers), JPA Auditing con `X-Usuario`, historial con Envers* | | ✅ |
 |   | *Fase 5 completada el 10-09: Swagger/OpenAPI, colección Bruno, README, V5 datos semilla, tests JUnit/MockMvc, `pruebas/e2e.sh`* | | ✅ |
 | 6 | Informe PDF, revisión de formato, GitHub y ZIP | 5 (10) | 16-09 |
+|   | *Fase 6 en curso (12–13-09): verificación desde cero (11 tests, 110 e2e, Postman/Newman 30 requests y 31 assertions; colección migrada de Bruno a Postman), evidencias en `docs/evidencias/`, informe generado por script con Anexo A, clon de GitHub probado desde cero. Faltan las capturas de la app, Arial, ZIP y push* | | ⏳ |
 | — | Colchón | — | 17-09 |
 
 ## 7. Pendientes para confirmar con el profesor
-1. ¿Los anexos con screenshots cuentan dentro del máximo de 10 páginas?
-2. ¿Qué apellido/nombre va en `EXT_GRUPO_APELLIDO_NOMBRE` si el trabajo es grupal?
-3. ¿El repositorio de GitHub puede ser privado, invitándolo como colaborador?
+1. ~~¿Los anexos con screenshots cuentan dentro del máximo de 10 páginas?~~ Resuelto el 13-09: se acepta anexo y el máximo total es 15 páginas.
+2. ~~¿Qué apellido/nombre va en `EXT_GRUPO_APELLIDO_NOMBRE` si el trabajo es grupal?~~ Resuelto: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON`.
+3. ~~¿El repositorio de GitHub puede ser privado?~~ No aplica: el repositorio es público.

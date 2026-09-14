@@ -1,0 +1,11 @@
+# Evidencia generada el 2026-09-13 20:40:26 -0300 (salida literal; proyecto de Compose con volumenes nuevos: COMPOSE_PROJECT_NAME=verificacion)
+$ docker compose exec -T -e MYSQL_PWD=coleccion mysql mysql -ucoleccion coleccion_laminas -t -e "SELECT installed_rank, version, description, script, installed_on, execution_time, success FROM flyway_schema_history;"
++----------------+---------+----------------------------+------------------------------------+---------------------+----------------+---------+
+| installed_rank | version | description                | script                             | installed_on        | execution_time | success |
++----------------+---------+----------------------------+------------------------------------+---------------------+----------------+---------+
+|              1 | 1       | crear tabla album          | V1__crear_tabla_album.sql          | 2026-09-13 20:40:17 |             66 |       1 |
+|              2 | 2       | crear tabla lamina         | V2__crear_tabla_lamina.sql         | 2026-09-13 20:40:17 |            111 |       1 |
+|              3 | 3       | agregar columnas auditoria | V3__agregar_columnas_auditoria.sql | 2026-09-13 20:40:17 |            200 |       1 |
+|              4 | 4       | crear tablas envers        | V4__crear_tablas_envers.sql        | 2026-09-13 20:40:18 |            169 |       1 |
+|              5 | 5       | datos semilla              | V5__datos_semilla.sql              | 2026-09-13 20:40:18 |             42 |       1 |
++----------------+---------+----------------------------+------------------------------------+---------------------+----------------+---------+

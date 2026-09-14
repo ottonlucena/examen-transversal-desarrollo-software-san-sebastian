@@ -33,7 +33,7 @@ Los PDFs y `text-clase` son material de referencia: **no se modifican ni se muev
 | Auditoría histórica | `org.hibernate.orm:hibernate-envers` | Versión gestionada por Boot |
 | Validación | `spring-boot-starter-validation` | Jakarta Bean Validation |
 | Docs API | `springdoc-openapi-starter-webmvc-ui` **3.1.0** | Boot 4 ⇒ springdoc **3.x**; la 2.x no funciona |
-| Pruebas API | Bruno (colección en `docs/api/bruno/`) | Sugerido por el profesor |
+| Pruebas API | Postman (colección en `docs/api/postman/`, ejecutable con Newman) | El profesor citó Bruno como ejemplo; el grupo eligió Postman (13-09) |
 | Tests de integración | Testcontainers 2.x (`testcontainers-mysql`, imagen `mysql:8.4`) | `./mvnw verify` usa MySQL real; **requiere Docker corriendo** |
 | Contenedores | Docker Compose v2 (`compose.yaml`) | |
 
@@ -53,7 +53,7 @@ backend/                  proyecto Spring Boot (Initializr) + Dockerfile
     db/migration/         V{n}__{descripcion}.sql
   src/test/java/cl/ipss/coleccion/
 docs/
-  api/bruno/              colección Bruno
+  api/postman/            colección Postman + archivos de prueba
   evidencias/             screenshots NN-endpoint-caso.png
   informe/                informe (fuente + PDF) y GUIA_INFORME_Y_CAPTURAS.md
 pruebas/e2e.sh            pruebas end-to-end (curl + python3)
@@ -70,7 +70,7 @@ pruebas/e2e.sh            pruebas end-to-end (curl + python3)
 | Reconstruir solo la API | `docker compose up -d --build api` |
 | Ver migraciones aplicadas | `docker compose exec mysql mysql -u coleccion -p coleccion_laminas -e "SELECT * FROM flyway_schema_history;"` |
 | Pruebas end-to-end | `bash pruebas/e2e.sh` (con la API levantada) |
-| Colección Bruno | `cd docs/api/bruno && npx @usebruno/cli run -r --env local` |
+| Colección Postman (Newman) | `npx newman run docs/api/postman/coleccion-laminas.postman_collection.json --working-dir docs/api/postman` |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
 | Detener y borrar datos | `docker compose down -v` (**destructivo: pedir confirmación antes**) |
 
@@ -185,7 +185,7 @@ pruebas/e2e.sh            pruebas end-to-end (curl + python3)
 
 ## 14. Pruebas y evidencias
 
-- Cada endpoint tiene en Bruno **un caso feliz y al menos un caso de error**.
+- Cada endpoint tiene en la colección Postman **un caso feliz y al menos un caso de error**.
 - Cada prueba ejecutada genera un screenshot en `docs/evidencias/` con el nombre `NN-recurso-accion-caso.png` (ej. `07-laminas-repetidas-ok.png`, `08-laminas-lote-duplicado-400.png`). Van todos al informe.
 - Evidencias obligatorias además de los endpoints:
   - Initializr;
@@ -200,10 +200,10 @@ pruebas/e2e.sh            pruebas end-to-end (curl + python3)
   - `@WebMvcTest` + `@MockitoBean` para la capa web;
   - integración con Testcontainers, que aplica todas las migraciones y valida el esquema.
 - Todo endpoint nuevo o modificado debe tener:
-  - su request en la colección Bruno, numerada y con `tests {}`;
+  - su request en la colección Postman, numerada y con tests (`pm.test`);
   - sus casos en `pruebas/e2e.sh`;
   - la actualización de la guía de capturas si cambia la numeración.
-- Antes de dar una fase por terminada deben pasar las tres suites: `./mvnw verify`, `bash pruebas/e2e.sh` y la colección Bruno con el CLI.
+- Antes de dar una fase por terminada deben pasar las tres suites: `./mvnw verify`, `bash pruebas/e2e.sh` y la colección Postman con Newman.
 
 ## 15. Uso de documentación: Context7 y Tavily
 
@@ -219,10 +219,10 @@ pruebas/e2e.sh            pruebas end-to-end (curl + python3)
 - [ ] Compila y `./mvnw verify` pasa sin warnings nuevos
 - [ ] La app arranca contra MySQL en Docker y `validate` no reporta diferencias
 - [ ] Si cambió el esquema, hay una migración nueva y no se editó una anterior
-- [ ] Endpoint probado en Bruno (caso feliz y caso de error) y visible en Swagger
+- [ ] Endpoint probado en Postman (caso feliz y caso de error) y visible en Swagger
 - [ ] Javadoc agregado o actualizado
 - [ ] Checklist de `BRIEF.md §5` marcado
-- [ ] README o colección Bruno actualizados si cambió la API
+- [ ] README o colección Postman actualizados si cambió la API
 
 ## 17. Prohibido
 
