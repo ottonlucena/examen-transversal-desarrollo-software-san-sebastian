@@ -328,19 +328,19 @@ Comandos:
 - [x] README + colección Postman (30 requests numeradas como las capturas; migrada desde Bruno el 13-09) + datos semilla (V5)
 - [x] Tests automáticos: 11 (unitarios, MockMvc, integración) + e2e (110) + Newman (30 requests, 31 assertions); verificado desde cero el 13-09
 
-**Informe** (verificado sobre el PDF generado el 13-09)
-- [ ] Formato exacto (Arial 12, 1,15, justificado, numerado, 5–15 págs.): interlineado, justificado, numeración y extensión verificados; **falta Arial real** (el PDF sale con Liberation Sans hasta instalar la fuente)
+**Informe** (verificado sobre el PDF final del 13-09)
+- [x] Formato exacto (Arial 12, 1,15, justificado, numerado): `pdffonts` lista solo ArialMT, Arial-BoldMT y Arial-ItalicMT; 14 páginas; el script corta si el PDF no incrusta Arial
 - [x] Portada completa con logo IPSS, profesor, integrantes y grupo
 - [x] Justificación de la tecnología
 - [x] Todas las secciones (más el Anexo A)
-- [ ] Screenshot de cada prueba: el informe ya reserva una figura por prueba, pero **faltan las capturas de Postman, IDE, Initializr y diagrama ER**
+- [x] Screenshot de cada prueba: 47 capturas revisadas una por una; cada request 12–41 tiene su figura (cuerpo o Anexo A)
 - [x] Evidencia de migraciones (`flyway_schema_history`) y de auditoría (`revinfo` + `lamina_aud`)
 
 **Entrega**
-- [x] Repositorio en GitHub público (verificado con `git clone` sin credenciales el 13-09); **falta subir la Fase 6**
-- [ ] `ENLACE_GITHUB.txt` con el link
-- [ ] ZIP = proyecto (sin `target/`, `uploads/`, `.env` ni material del curso) + informe PDF + `.txt` con el link + `docs/evidencias/`
-- [ ] Nombre: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON` (confirmado; falta armar el ZIP)
+- [x] Repositorio en GitHub público (verificado con `git clone` sin credenciales el 13-09), con la Fase 6 subida
+- [x] `ENLACE_GITHUB.txt` con el link
+- [x] ZIP = proyecto (sin `target/`, `uploads/`, `.env`, `.git/`, `.docx` ni material del curso) + informe PDF + `.txt` con el link + `docs/evidencias/`; probado desde cero
+- [x] Nombre: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON`
 - [ ] Subido antes del **17-09-2026**
 
 ---
@@ -360,10 +360,10 @@ Comandos:
 |   | *Fase 4 completada el 10-09: migraciones V3 (columnas auditoría) y V4 (Envers), JPA Auditing con `X-Usuario`, historial con Envers* | | ✅ |
 |   | *Fase 5 completada el 10-09: Swagger/OpenAPI, colección Bruno, README, V5 datos semilla, tests JUnit/MockMvc, `pruebas/e2e.sh`* | | ✅ |
 | 6 | Informe PDF, revisión de formato, GitHub y ZIP | 5 (10) | 16-09 |
-|   | *Fase 6 en curso (12–13-09): verificación desde cero (11 tests, 110 e2e, Postman/Newman 30 requests y 31 assertions; colección migrada de Bruno a Postman), evidencias en `docs/evidencias/`, informe generado por script con Anexo A, clon de GitHub probado desde cero. Faltan las capturas de la app, Arial, ZIP y push* | | ⏳ |
+|   | *Fase 6 completada el 13-09: verificación desde cero (11 tests, 110 e2e, Newman 30 requests y 31 assertions), colección migrada de Bruno a Postman, 47 evidencias, informe en Arial (14 páginas, Anexo A), ZIP probado desde cero y push. Falta solo subir el ZIP a la plataforma* | | ✅ |
 | — | Colchón | — | 17-09 |
 
 ## 7. Pendientes para confirmar con el profesor
-1. ~~¿Los anexos con screenshots cuentan dentro del máximo de 10 páginas?~~ Resuelto el 13-09: se acepta anexo y el máximo total es 15 páginas.
+1. ~~¿Los anexos con screenshots cuentan dentro del máximo de 10 páginas?~~ Resuelto el 13-09: se acepta anexo; el profesor confirmó que el anexo no cuenta dentro del límite de páginas.
 2. ~~¿Qué apellido/nombre va en `EXT_GRUPO_APELLIDO_NOMBRE` si el trabajo es grupal?~~ Resuelto: `EXT_2_LUCENA_GOMEZ_VALERIA_OTTON`.
 3. ~~¿El repositorio de GitHub puede ser privado?~~ No aplica: el repositorio es público.

@@ -838,6 +838,13 @@ def main():
     for titulo, pagina in paginas.items():
         print(f"  {pagina:>2}  {titulo}")
     print("Fuentes del PDF:\n" + fuentes)
+    # Sin Arial instalada, LibreOffice la sustituye (Liberation Sans) al exportar: el enunciado exige Arial 12
+    if "Arial" not in fuentes or "LiberationSans" in fuentes:
+        sys.exit("El PDF no incrusta Arial: LibreOffice la reemplazo por otra fuente. Instala Arial y vuelve a generar:\n"
+                 "  echo 'ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true'"
+                 " | sudo debconf-set-selections\n"
+                 "  sudo apt-get install -y ttf-mscorefonts-installer && fc-cache -f\n"
+                 "  fc-match Arial    # debe responder Arial.ttf, no LiberationSans")
     if informe.faltantes:
         print(f"CAPTURAS PENDIENTES ({len(informe.faltantes)}): " + ", ".join(informe.faltantes))
     if not PAGINAS_MIN <= total <= PAGINAS_MAX:
