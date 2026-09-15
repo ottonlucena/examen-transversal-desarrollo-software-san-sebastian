@@ -11,12 +11,12 @@ API REST en Spring Boot para coleccionistas de láminas de álbumes: CRUD de ál
 
 ### Orden de prioridad de las fuentes
 Si dos fuentes se contradicen, gana la de más arriba:
-1. **Indicaciones del profesor en clase** (`text-clase`): MySQL obligatorio, auditoría = migraciones, Docker, sin NoSQL.
-2. **Rúbrica** (`Rúbrica examen - Desarrollo de sotfware II (1).pdf`): "al pie de la letra".
-3. **Enunciado** (`Examen transversal (1).pdf`).
+1. **Indicaciones del profesor en clase**: MySQL obligatorio, auditoría = migraciones, Docker, sin NoSQL.
+2. **Rúbrica de la asignatura**: "al pie de la letra".
+3. **Enunciado de la asignatura**.
 4. **`BRIEF.md`**.
 
-Los PDFs y `text-clase` son material de referencia: **no se modifican ni se mueven**.
+El enunciado y la rúbrica de la asignatura son material de referencia: **no se modifican ni se mueven**.
 
 ---
 

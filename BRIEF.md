@@ -36,32 +36,11 @@ El profesor pidió seguir estas funcionalidades **al pie de la letra**.
 | 4 | **Validaciones y auditoría** (IL2) | **20** | "Validaciones avanzadas y auditorías detalladas para rastrear cambios" | Bean Validation, validaciones de negocio, errores uniformes, **migraciones Flyway** (lo que pidió el profesor), JPA Auditing y Hibernate Envers |
 | 5 | Calidad del informe y documentación del código | **10** | Informe bien estructurado; explicación clara de todo el código | Informe PDF con formato exacto, justificación de la tecnología, Javadoc, Swagger y colección Postman |
 
-### 2.2 Aclaraciones del profesor en la última clase
-
-| Tema | PDFs | Lo que dijo el profesor | Decisión |
-|------|------|-------------------------|----------|
-| **Auditoría** | "Herramientas de auditoría para rastrear cambios en la BD" | **"La herramienta de auditoría son migrations… utilizar migraciones, importante"** | **Flyway es obligatorio.** `ddl-auto=validate`: el esquema lo crean solo las migraciones. JPA Auditing y Envers quedan como capa extra para Sobresaliente. |
-| **Docker** | No se menciona | "Van a tener que usar Docker… está pidiendo MySQL, por lo tanto Docker" | `compose.yaml` con MySQL y la API. |
-| **Framework** | Spring Boot + Maven | Puede ser cualquiera, **justificándolo en el informe**; "porque lo pedía el trabajo" también es válido | Seguimos con Spring Boot (cumple enunciado y rúbrica) + sección de justificación en el informe. |
-| **BD no relacional** | La rúbrica la menciona | "Olvídense de lo no relacional… es relacional sí o sí" | **Sin NoSQL.** Solo MySQL. |
-| **Formato del informe** | Word o PDF | Acepta PDF, Markdown o video; **pidió no mandar Word** | **PDF.** |
-| **Entrega del código** | ZIP | "Mándenlo en un GitHub y el link en un documento de texto" | GitHub + `.txt` con el link, **dentro del ZIP**, para cumplir ambas instrucciones. |
-| **Documentación de la API** | "Documentación simple" | Vale colección de Bruno, PDF, Markdown u OpenAPI (Bruno solo como ejemplo) | **Swagger/OpenAPI + colección Postman** (el 13-09 el grupo cambió Bruno por Postman). |
-| **Fotos** | "Carga opcional de una foto" | `multipart`; guardar imágenes en Base64 en la BD es mala práctica | Archivo en disco (volumen Docker) y solo la ruta en la BD. |
-| **Rúbrica** | — | "Siempre la rúbrica al pie de la letra" | La rúbrica manda. Lo único flexible es la tecnología; MySQL es fijo. |
-
 ### 2.3 Riesgos
 
-- **Sin validaciones ni auditoría se pierden 20 pts** (nota máxima ≈ 5,5), y **sin migraciones el indicador 4 queda cojo** aunque haya Envers.
 - **Informe con tope de 15 páginas, anexo incluido** (aclaración recibida por el grupo el 13-09; el enunciado dice 5 a 10) y un screenshot por prueba: las capturas representativas van en el cuerpo y el resto en el Anexo A, en grilla.
 - **"Eficiente"** aparece en los indicadores 2 y 3: faltantes y repetidas se resuelven con consultas a la BD, nunca filtrando listas en memoria; la carga en lote va con `@Transactional`.
 - **Plazo corto (~1 semana):** el alcance mínimo va primero y los extras (Envers, tests) después.
-
-| Escenario | Puntaje | Nota |
-|-----------|:------:|:----:|
-| Todo "Alto" | 80 | 5,5 |
-| Todo "Alto" sin validaciones ni auditoría | 64 | 4,3 |
-| Todo "Sobresaliente" | 100 | 7,0 |
 
 ---
 
