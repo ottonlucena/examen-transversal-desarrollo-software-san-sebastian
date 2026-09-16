@@ -6,7 +6,7 @@
 **Plazo:** **jueves 17-09-2026** (el 18 es feriado; el profesor debe tener las notas antes del viernes)
 **Entregables:** informe en **PDF** + repositorio **GitHub** (link en un `.txt`) + **ZIP** con proyecto e informe → `EXT_GRUPO_APELLIDO_NOMBRE`
 
-> Fuentes: enunciado (PDF), rúbrica (PDF) y transcripción de la última clase (`text-clase`). Cuando el profesor aclaró o cambió algo en clase, esta versión del brief ya lo incorpora (ver §2.2).
+> Fuentes: el enunciado y la rúbrica de la asignatura, más las indicaciones del profesor en clase. Cuando el profesor aclaró o cambió algo, esta versión del brief ya lo incorpora.
 
 ---
 
@@ -36,7 +36,7 @@ El profesor pidió seguir estas funcionalidades **al pie de la letra**.
 | 4 | **Validaciones y auditoría** (IL2) | **20** | "Validaciones avanzadas y auditorías detalladas para rastrear cambios" | Bean Validation, validaciones de negocio, errores uniformes, **migraciones Flyway** (lo que pidió el profesor), JPA Auditing y Hibernate Envers |
 | 5 | Calidad del informe y documentación del código | **10** | Informe bien estructurado; explicación clara de todo el código | Informe PDF con formato exacto, justificación de la tecnología, Javadoc, Swagger y colección Postman |
 
-### 2.3 Riesgos
+### 2.2 Riesgos
 
 - **Informe con tope de 15 páginas, anexo incluido** (aclaración recibida por el grupo el 13-09; el enunciado dice 5 a 10) y un screenshot por prueba: las capturas representativas van en el cuerpo y el resto en el Anexo A, en grilla.
 - **"Eficiente"** aparece en los indicadores 2 y 3: faltantes y repetidas se resuelven con consultas a la BD, nunca filtrando listas en memoria; la carga en lote va con `@Transactional`.
